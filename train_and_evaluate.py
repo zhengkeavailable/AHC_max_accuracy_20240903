@@ -44,15 +44,15 @@ def train_and_evaluate(file_path, n_iters=1000, positive_size=1.0, negative_size
     y_pred_test = clf.predict(X_test)
 
     # Calculate metrics and store split results
-    results = {'X_train': X_train, 'y_train': y_train, 'X_test': X_test, 'y_test': y_test,
-               'train_accuracy': accuracy_score(y_train, y_pred_train),
-               'test_accuracy': accuracy_score(y_test, y_pred_test),
-               'train_precision': precision_score(y_train, y_pred_train),
-               'train_recall': recall_score(y_train, y_pred_train),
-               'test_precision': precision_score(y_test, y_pred_test), 'test_recall': recall_score(y_test, y_pred_test),
-               'weights': clf.coef_[0], 'bias': clf.intercept_[0]}
+    result = {'X_train': X_train, 'y_train': y_train, 'X_test': X_test, 'y_test': y_test,
+              'train_accuracy': accuracy_score(y_train, y_pred_train),
+              'test_accuracy': accuracy_score(y_test, y_pred_test),
+              'train_precision': precision_score(y_train, y_pred_train),
+              'train_recall': recall_score(y_train, y_pred_train),
+              'test_precision': precision_score(y_test, y_pred_test), 'test_recall': recall_score(y_test, y_pred_test),
+              'weights': clf.coef_[0], 'bias': clf.intercept_[0]}
 
-    return results
+    return result
 
 
 def evaluate_classification(X, y, weight, bias):  # X, y, w obtained by PIP, b obtained by PIP
@@ -60,13 +60,16 @@ def evaluate_classification(X, y, weight, bias):  # X, y, w obtained by PIP, b o
     scores = np.dot(X, weight) + bias
     predictions = np.zeros_like(y)  # Initialize predictions array
     buffered_predictions = np.zeros_like(y)
+
     # Assign predictions based on decision boundary
     predictions[scores >= 0] = 1  # Predict 1 if weight^T X + bias >= 0
     predictions[scores < 0] = -1  # Predict -1 if weight^T X + bias < 0
     buffered_predictions[scores >= -1e-5] = 1  # Predict 1 if weight^T X + bias >= 0
     buffered_predictions[scores < -1e-5] = -1  # Predict -1 if weight^T X + bias < 0
+
     # Convert y from -1/1 to 0/1 for compatibility with predictions
     y_binary = (y + 1) // 2  # 1 if y is 1, 0 if y is -1
+
     # Calculate metrics
     TP = np.sum((predictions == 1) & (y_binary == 1))
     FP = np.sum((predictions == 1) & (y_binary == 0))
@@ -76,14 +79,17 @@ def evaluate_classification(X, y, weight, bias):  # X, y, w obtained by PIP, b o
     FP_ = np.sum((buffered_predictions == 1) & (y_binary == 0))
     TN_ = np.sum((buffered_predictions == -1) & (y_binary == 0))
     FN_ = np.sum((buffered_predictions == -1) & (y_binary == 1))
+
     # Calculate precision, recall, and accuracy
     precision = TP / (TP + FP) if (TP + FP) > 0 else 0.0
     recall = TP / (TP + FN) if (TP + FN) > 0 else 0.0
     accuracy = (TP + TN) / len(y)
+
     buffered_precision = TP_ / (TP_ + FP_) if (TP_ + FP_) > 0 else 0.0
     buffered_recall = TP_ / (TP_ + FN_) if (TP_ + FN_) > 0 else 0.0
     buffered_accuracy = (TP_ + TN_) / len(y)
-    real_results = {'recall': recall, 'precision': precision, 'accuracy': accuracy}
-    buffered_results = {'recall': buffered_recall, 'precision': buffered_precision, 'accuracy': buffered_accuracy}
-    return real_results, buffered_results
 
+    real_result = {'recall': recall, 'precision': precision, 'accuracy': accuracy}
+    buffered_result = {'recall': buffered_recall, 'precision': buffered_precision, 'accuracy': buffered_accuracy}
+
+    return real_result, buffered_result

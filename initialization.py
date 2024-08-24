@@ -107,6 +107,7 @@ def initialization(positive_size=1.0, negative_size=0.125, fixed_beta_p=0.1, out
                                                                                                           y_test,
                                                                                                           w_start,
                                                                                                           b_start)
+
     # outer
     with open(outer_result_file, mode='a', newline='') as file:
         writer = csv.writer(file)
@@ -154,6 +155,7 @@ def initialization(positive_size=1.0, negative_size=0.125, fixed_beta_p=0.1, out
             ['initial_test', results['test_accuracy'], results['test_precision'], results['test_recall'],
              initial_buffered_test_results['accuracy'], initial_buffered_test_results['precision'],
              initial_buffered_test_results['recall']])
+
     # return
     return (
         model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho,
