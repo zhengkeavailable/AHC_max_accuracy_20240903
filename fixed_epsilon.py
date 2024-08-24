@@ -41,41 +41,41 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
     item_minus = [0, N]
     objective_value_list = []
     optimality_gap_list = []
-    
+
     w_list = []
     b_list = []
-    
+
     objective_function_terms_list = []
     real_train_results_list, buffered_train_results_list = [], []
     real_test_results_list, buffered_test_results_list = [], []
-    
+
     epsilon = epsilon
     epsilon_list = []
     objective_value = -M
-    
+
     z_plus_start = None
     z_minus_start = None
-    
+
     counts_results_list = []
     real_test_precision_violation_list = []
     buffered_test_precision_violation_list = []
     start_time = time.time()
     execution_time = []
-    
-    for fixed_iteration in range(max_fixed_times):
-        epsilon_q = epsilon * (10 ** (-fixed_iteration - 1))
+
+    for fixed_times in range(max_fixed_times):
+        epsilon_q = epsilon * (10 ** (-fixed_times - 1))
         epsilon_list.append(epsilon_q)
-        
+
         current_datetime = datetime.now()
-        
+
         dirname = fixed_dirname + '/' + current_datetime.strftime("%Y-%m-%d_%H-%M-%S") + '_fixed_times=' + str(
-            fixed_iteration)
-        
+            fixed_times)
+
         os.makedirs(dirname)
         os.makedirs(dirname + '/LogFile')
         os.makedirs(dirname + '/Model')
         os.makedirs(dirname + '/Solution')
-        
+
         gamma_0, z_plus_start, z_minus_start = initial_feasible_sol.calculate_gamma(obj_cons_num,
                                                                                     X_train,
                                                                                     y_train,
@@ -83,58 +83,63 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
                                                                                     b_start,
                                                                                     beta_p,
                                                                                     epsilon_q)
-        
+
         delta_1, delta_2 = initial_feasible_sol.calculate_delta(obj_cons_num=obj_cons_num, item_plus=item_plus,
-                                                                item_minus=item_minus, X=X_train, y=y_train, weight=w_start,
+                                                                item_minus=item_minus, X=X_train, y=y_train,
+                                                                weight=w_start,
                                                                 bias=b_start, epsilon=epsilon_q, base_rate=base_rate)
-        
+
         objective_value, optimality_gap, w_current, b_current, z_plus_current, z_minus_current, objective_function_terms, real_train_result, buffered_train_result, counts_result = PIP_iterations.pip_iterations(
-            model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, z_plus_start, z_minus_start, epsilon_q,
+            model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, z_plus_start, z_minus_start,
+            epsilon_q,
             delta_1, delta_2, gamma_0, M, rho, beta_p, lbd, max_inner_iteration, base_rate, enlargement_rate,
-            shrinkage_rate, pip_max_rate, objective_value, fixed_iteration, dirname, fixed)
+            shrinkage_rate, pip_max_rate, objective_value, fixed_times, dirname, fixed)
         end_time = time.time()
-        
+
         execution_time.append(end_time - start_time)
         objective_value_list.append(objective_value)
         optimality_gap_list.append(optimality_gap)
         w_list.append(w_current)
         b_list.append(b_current)
-        
+
         y_binary = ((y_train + 1) / 2)
         y_test_binary = ((y_test + 1) / 2)
-        precision_and_accuracy_curve.precision_accuracy_curve(X_train, y_binary, w_current, b_current, num_thresholds=100,
+        precision_and_accuracy_curve.precision_accuracy_curve(X_train, y_binary, w_current, b_current,
+                                                              num_thresholds=100,
                                                               save_path=dirname + '/fixed_times=' + str(
-                                                 fixed_iteration) + '_precision_accuracy_curve_train_beta_p=' + str(
-                                                 beta_p) + '.png')
-        precision_and_accuracy_curve.precision_accuracy_curve(X_test, y_test_binary, w_current, b_current, num_thresholds=100,
-                                             save_path=dirname + '/fixed_times=' + str(
-                                                 fixed_iteration) + '_precision_accuracy_curve_test_beta_p=' + str(
-                                                 beta_p) + '.png')
-        
+                                                                  fixed_times) + '_precision_accuracy_curve_train_beta_p=' + str(
+                                                                  beta_p) + '.png')
+        precision_and_accuracy_curve.precision_accuracy_curve(X_test, y_test_binary, w_current, b_current,
+                                                              num_thresholds=100,
+                                                              save_path=dirname + '/fixed_times=' + str(
+                                                                  fixed_times) + '_precision_accuracy_curve_test_beta_p=' + str(
+                                                                  beta_p) + '.png')
+
         objective_function_terms_list.append(objective_function_terms)
         counts_results_list.append(counts_result)
         real_train_results_list.append(real_train_result)
         buffered_train_results_list.append(buffered_train_result)
-        
-        real_test_result, buffered_test_result = train_and_evaluate.evaluate_classification(X_test, y_test, w_current, b_current)
-        
+
+        real_test_result, buffered_test_result = train_and_evaluate.evaluate_classification(X_test, y_test, w_current,
+                                                                                            b_current)
+
         real_test_results_list.append(real_test_result)
-        
+
         real_test_precision_violation = max(0, (beta_p - real_test_result['precision']) / beta_p)
         real_test_precision_violation_list.append(real_test_precision_violation)
-        
+
         buffered_test_results_list.append(buffered_test_result)
-        
+
         buffered_test_precision_violation = max(0, (beta_p - buffered_test_result['precision']) / beta_p)
         buffered_test_precision_violation_list.append(buffered_test_precision_violation)
 
     iterative_time = [execution_time[0]]
     iterative_time += [execution_time[i] - execution_time[i - 1] for i in range(1, len(execution_time))]
-    
-    with open(fixed_dirname + '/fixed_results_beta_p='+str(beta_p)+'.csv', mode='w', newline='') as file:
+
+    with open(fixed_dirname + '/fixed_results_beta_p=' + str(beta_p) + '.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(
-            ['fixed_iteration', 'objective_value', 'optimality_gap', 'epsilon_q', 'cumulative_time', 'iterative_time',
+            ['fixed_times', 'objective_value', 'optimality_gap', 'epsilon_q', 'cumulative_time', 'iterative_time',
              'w', 'b',
              'accuracy_in_obj', 'gamma_in_obj', 'regularization_not_in_obj',
              'real_TP', 'real_FP', 'real_TN', 'real_FN',
@@ -145,7 +150,7 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
              'real_test_accuracy', 'real_test_precision', 'real_test_recall', 'real_test_precision_violation',
              'buffered_test_accuracy', 'buffered_test_precision', 'buffered_test_recall',
              'buffered_test_precision_violation'])
-        
+
         for iteration in range(max_fixed_times):
             writer.writerow(
                 [iteration, objective_value_list[iteration], optimality_gap_list[iteration], epsilon_list[iteration],
@@ -162,21 +167,24 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
                  counts_results_list[iteration]['violations'],
                  real_train_results_list[iteration]['accuracy'], real_train_results_list[iteration]['precision'],
                  real_train_results_list[iteration]['recall'],
-                 buffered_train_results_list[iteration]['accuracy'], buffered_train_results_list[iteration]['precision'],
+                 buffered_train_results_list[iteration]['accuracy'],
+                 buffered_train_results_list[iteration]['precision'],
                  buffered_train_results_list[iteration]['recall'],
                  real_test_results_list[iteration]['accuracy'], real_test_results_list[iteration]['precision'],
                  real_test_results_list[iteration]['recall'],
                  real_test_precision_violation_list[iteration],
                  buffered_test_results_list[iteration]['accuracy'], buffered_test_results_list[iteration]['precision'],
                  buffered_test_results_list[iteration]['recall'], buffered_test_precision_violation_list[iteration]])
-            
+
     with open(fixed_dirname + '/fixed_results_comparison.csv', mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(
-            ['final_train', real_train_results_list[max_fixed_times - 1]['accuracy'], real_train_results_list[max_fixed_times - 1]['precision'],
+            ['final_train', real_train_results_list[max_fixed_times - 1]['accuracy'],
+             real_train_results_list[max_fixed_times - 1]['precision'],
              real_train_results_list[max_fixed_times - 1]['recall'],
-             buffered_train_results_list[max_fixed_times - 1]['accuracy'], buffered_train_results_list[max_fixed_times - 1]['precision'],
+             buffered_train_results_list[max_fixed_times - 1]['accuracy'],
+             buffered_train_results_list[max_fixed_times - 1]['precision'],
              buffered_train_results_list[max_fixed_times - 1]['recall']])
-        
+
     return objective_value, w_start, b_start, z_plus_start, z_minus_start, counts_results_list[max_fixed_times - 1][
         'precision_in_constraint']

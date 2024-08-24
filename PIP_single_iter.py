@@ -274,8 +274,8 @@ def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start
     }
 
     # in fact, regularization is not included in fixed-epsilon problem, but we still calculate this term for final result comparison
-    objective_function_terms = {
+    objective_function_term = {
         'accuracy_in_obj': sum((optimal_z_plus[0][j] / N) for j in J_0_plus[0]) + sum((1 / N) for _ in J_ge_plus[0]),
         'gamma_in_obj': gamma.X,
         'regularization': lbd * (gp.quicksum(abs_diff_w[p].X for p in range(dim)) + abs_diff_b.X)}
-    return optimal_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_terms, real_train_result, buffered_train_result, counts_results
+    return optimal_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_term, real_train_result, buffered_train_result, counts_results

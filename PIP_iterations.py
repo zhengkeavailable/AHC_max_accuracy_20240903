@@ -68,7 +68,7 @@ def pip_iterations(model, obj_cons_num, X_train, y_train, X_test, y_test, w_star
 
     for iteration in range(max_iteration):
         objective_value_old = objective_value
-        objective_value, optimality_gap, w_start, b_start, z_plus_start, z_minus_start, objective_function_terms, real_results, buffered_results, counts_results = PIP_single_iter.pip_single_iter(
+        objective_value, optimality_gap, w_start, b_start, z_plus_start, z_minus_start, objective_function_term, real_results, buffered_results, counts_results = PIP_single_iter.pip_single_iter(
             model=model, obj_cons_num=obj_cons_num, X_train=X_train, y_train=y_train, w_bar=w_bar, b_bar=b_bar,
             w_start=w_start, b_start=b_start, z_plus_start=z_plus_start, z_minus_start=z_minus_start, epsilon=epsilon,
             delta_1=delta_1, delta_2=delta_2, gamma_0=gamma, M=M, rho=rho, beta_p=beta_p, lbd=lbd, iterations=iteration,
@@ -76,14 +76,14 @@ def pip_iterations(model, obj_cons_num, X_train, y_train, X_test, y_test, w_star
         end_time = time.time()
 
         execution_time.append(end_time - start_time)
-        gamma = objective_function_terms['gamma_in_obj']
+        gamma = objective_function_term['gamma_in_obj']
 
         objective_value_list.append(objective_value)
         optimality_gap_list.append(optimality_gap)
         w_list.append(w_start)
         b_list.append(b_start)
 
-        objective_function_terms_list.append(objective_function_terms)
+        objective_function_terms_list.append(objective_function_term)
         counts_results_list.append(counts_results)
 
         real_train_results.append(real_results)
@@ -164,7 +164,7 @@ def pip_iterations(model, obj_cons_num, X_train, y_train, X_test, y_test, w_star
     buffered_train_result = buffered_train_results[max_iteration - 1]
 
     final_optimality_gap = optimality_gap_list[max_iteration - 1]
-    final_objective_function_terms = objective_function_terms_list[max_iteration - 1]
+    final_objective_function_term = objective_function_terms_list[max_iteration - 1]
     final_counts_result = counts_results_list[max_iteration - 1]
 
-    return objective_value, final_optimality_gap, w_start, b_start, z_plus_start, z_minus_start, final_objective_function_terms, real_train_result, buffered_train_result, final_counts_result
+    return objective_value, final_optimality_gap, w_start, b_start, z_plus_start, z_minus_start, final_objective_function_term, real_train_result, buffered_train_result, final_counts_result

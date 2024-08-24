@@ -1,6 +1,7 @@
 import gurobipy as gp
 from gurobipy import GRB
 import numpy as np
+import csv
 
 
 def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_start, z_minus_start, epsilon, gamma_0,
@@ -167,9 +168,59 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
         'precision_in_constraint': precision_in_constraint, 'violations': violations
     }
 
-    objective_function_terms = {
+    objective_function_term = {
         'accuracy_in_obj': sum((optimal_z_plus[0][j] / N) for j in range(N)),
         'gamma_in_obj': gamma.X,
         'regularization': 0}
 
-    return optimal_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_terms, real_train_result, buffered_train_result, counts_results
+    return optimal_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_term, real_train_result, buffered_train_result, counts_results
+
+
+def output_full_mip(objective_value, optimality_gap, epsilon,
+                    execution_time,
+                    w, b,
+                    objective_function_term,
+                    counts_result,
+                    real_train_result,
+                    buffered_train_result,
+                    real_test_result,
+                    real_test_precision_violation,
+                    buffered_test_result,
+                    buffered_test_precision_violation, full_mip_dirname, full_mip_beta_p):
+    with open(full_mip_dirname + '/full_mip_results_beta_p=' + str(full_mip_beta_p) + '.csv', mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(
+            ['iteration', 'objective_value', 'optimality_gap', 'epsilon', 'cumulative_time', 'time',
+             'w', 'b',
+             'accuracy_in_obj', 'gamma_in_obj', 'regularization_in_obj',
+             'real_TP', 'real_FP', 'real_TN', 'real_FN',
+             'buffered_TP', 'buffered_FP', 'buffered_TN', 'buffered_FN',
+             'precision_in_constraint', 'violations',
+             'real_train_accuracy', 'real_train_precision', 'real_train_recall',
+             'buffered_train_accuracy', 'buffered_train_precision', 'buffered_train_recall',
+             'real_test_accuracy', 'real_test_precision', 'real_test_recall', 'real_test_precision_violation',
+             'buffered_test_accuracy', 'buffered_test_precision', 'buffered_test_recall',
+             'buffered_test_precision_violation'])
+        writer.writerow(
+            [0, objective_value, optimality_gap, epsilon,
+             execution_time, execution_time,
+             w, b,
+             objective_function_term['accuracy_in_obj'],
+             objective_function_term['gamma_in_obj'],
+             objective_function_term['regularization'],
+             counts_result['real_TP'], counts_result['real_FP'],
+             counts_result['real_TN'], counts_result['real_FN'],
+             counts_result['buffered_TP'], counts_result['buffered_FP'],
+             counts_result['buffered_TN'], counts_result['buffered_FN'],
+             counts_result['precision_in_constraint'],
+             counts_result['violations'],
+             real_train_result['accuracy'], real_train_result['precision'],
+             real_train_result['recall'],
+             buffered_train_result['accuracy'],
+             buffered_train_result['precision'],
+             buffered_train_result['recall'],
+             real_test_result['accuracy'], real_test_result['precision'],
+             real_test_result['recall'],
+             real_test_precision_violation,
+             buffered_test_result['accuracy'], buffered_test_result['precision'],
+             buffered_test_result['recall'], buffered_test_precision_violation])
