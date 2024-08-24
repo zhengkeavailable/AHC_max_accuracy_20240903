@@ -91,7 +91,7 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
     model.write(
         dirname + '/Model/' + 'model_full_mip.lp')
 
-    optimal_value = model.objVal
+    objective_value = model.objVal
     optimality_gap = model.MIPGap
     optimal_w = [w[p].X for p in range(dim)]
     optimal_b = b.X
@@ -180,10 +180,10 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
         'gamma_in_obj': gamma.X,
         'regularization': lbd * (gp.quicksum(abs_diff_w[p].X for p in range(dim)) + abs_diff_b.X)}
 
-    return optimal_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_term, real_train_result, buffered_train_result, counts_results
+    return objective_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_term, real_train_result, buffered_train_result, counts_results
 
 
-def output_full_mip(objective_value, optimality_gap, epsilon,
+def output_full_mip(objective_value, optimality_gap, full_mip_epsilon,
                     execution_time,
                     w, b,
                     objective_function_term,
@@ -209,7 +209,7 @@ def output_full_mip(objective_value, optimality_gap, epsilon,
              'buffered_test_accuracy', 'buffered_test_precision', 'buffered_test_recall',
              'buffered_test_precision_violation'])
         writer.writerow(
-            [0, objective_value, optimality_gap, epsilon,
+            [0, objective_value, optimality_gap, full_mip_epsilon,
              execution_time, execution_time,
              w, b,
              objective_function_term['accuracy_in_obj'],

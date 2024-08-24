@@ -46,9 +46,9 @@ def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start
     item_minus = [0, N]
 
     z_plus = {}
-    optimal_z_plus = {}
+    solution_z_plus = {}
     z_minus = {}
-    optimal_z_minus = {}
+    solution_z_minus = {}
 
     J_0_plus, J_ge_plus, J_le_plus, J_0_minus, J_ge_minus, J_le_minus = {}, {}, {}, {}, {}, {}
 
@@ -164,28 +164,28 @@ def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start
     model.write(
         dirname + '/Model' + iter_name + str(outer_or_fixed_iteration) + '_inner_iter=' + str(iterations) + ".lp")
 
-    optimal_value = model.objVal
+    objective_value = model.objVal
     optimality_gap = model.MIPGap
-    optimal_w = [w[p].X for p in range(dim)]
-    optimal_b = b.X
+    solution_w = [w[p].X for p in range(dim)]
+    solution_b = b.X
 
     for i in range(obj_cons_num):
-        optimal_z_plus[i] = {}
-        optimal_z_minus[i] = {}
+        solution_z_plus[i] = {}
+        solution_z_minus[i] = {}
 
         for j in J_0_plus[i]:
-            optimal_z_plus[i][j] = z_plus[i][j].X
+            solution_z_plus[i][j] = z_plus[i][j].X
         for j in J_ge_plus[i]:
-            optimal_z_plus[i][j] = 1
+            solution_z_plus[i][j] = 1
         for j in J_le_plus[i]:
-            optimal_z_plus[i][j] = 0
+            solution_z_plus[i][j] = 0
 
         for j in J_0_minus[i]:
-            optimal_z_minus[i][j] = z_minus[i][j].X
+            solution_z_minus[i][j] = z_minus[i][j].X
         for j in J_ge_minus[i]:
-            optimal_z_minus[i][j] = 1
+            solution_z_minus[i][j] = 1
         for j in J_le_minus[i]:
-            optimal_z_minus[i][j] = 0
+            solution_z_minus[i][j] = 0
 
     with (open(dirname + '/Solution' + iter_name + str(outer_or_fixed_iteration) + '_inner_iter=' + str(
             iterations) + '.txt',
@@ -201,15 +201,15 @@ def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start
                     print(str(j) + ' in ' + 'J_ge_plus[' + str(i) + ']', file=f)
                 else:
                     print(str(j) + ' in ' + 'J_le_plus[' + str(i) + ']', file=f)
-                print("z^+_" + str(i) + '_' + str(j) + '=', optimal_z_plus[i][j], file=f)
+                print("z^+_" + str(i) + '_' + str(j) + '=', solution_z_plus[i][j], file=f)
 
                 if i == 0:
                     print('\phi^+_' + str(i) + '_' + str(j) + '=',
-                          y_train[j] * (np.dot(optimal_w, X_train[j]) + optimal_b),
+                          y_train[j] * (np.dot(solution_w, X_train[j]) + solution_b),
                           file=f)
                 if i == 1:
                     print('\phi^+_' + str(i) + '_' + str(j) + '=',
-                          min(y_train[j], np.dot(optimal_w, X_train[j]) + optimal_b),
+                          min(y_train[j], np.dot(solution_w, X_train[j]) + solution_b),
                           file=f)
             for j in range(item_minus[i]):
 
@@ -220,26 +220,26 @@ def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start
                     print(str(j) + ' in ' + 'J_ge_minus[' + str(i) + ']', file=f)
                 else:
                     print(str(j) + ' in ' + 'J_le_minus[' + str(i) + ']', file=f)
-                print("z^-_" + str(i) + '_' + str(j) + '=', optimal_z_minus[i][j], file=f)
+                print("z^-_" + str(i) + '_' + str(j) + '=', solution_z_minus[i][j], file=f)
 
                 if i == 1:
                     print('-\phi^-_' + str(i) + '_' + str(j) + '-epsilon =',
-                          -(np.dot(optimal_w, X_train[j]) + optimal_b) - epsilon,
+                          -(np.dot(solution_w, X_train[j]) + solution_b) - epsilon,
                           file=f)
-                    if (np.dot(optimal_w, X_train[j]) + optimal_b < 0) & (
-                            np.dot(optimal_w, X_train[j]) + optimal_b > -epsilon):
+                    if (np.dot(solution_w, X_train[j]) + solution_b < 0) & (
+                            np.dot(solution_w, X_train[j]) + solution_b > -epsilon):
                         violations += 1
-                        print('\phi^-_' + str(i) + '_' + str(j) + '=', (np.dot(optimal_w, X_train[j]) + optimal_b),
+                        print('\phi^-_' + str(i) + '_' + str(j) + '=', (np.dot(solution_w, X_train[j]) + solution_b),
                               'violates the assumption!',
                               file=f)
 
     real_TP, real_FP, real_TN, real_FN = 0, 0, 0, 0
     for s in range(N):
-        if (np.dot(optimal_w, X_train[s]) + optimal_b >= 0) & (y_train[s] == 1):
+        if (np.dot(solution_w, X_train[s]) + solution_b >= 0) & (y_train[s] == 1):
             real_TP += 1
-        elif (np.dot(optimal_w, X_train[s]) + optimal_b >= 0) & (y_train[s] == -1):
+        elif (np.dot(solution_w, X_train[s]) + solution_b >= 0) & (y_train[s] == -1):
             real_FP += 1
-        elif (np.dot(optimal_w, X_train[s]) + optimal_b < 0) & (y_train[s] == 1):
+        elif (np.dot(solution_w, X_train[s]) + solution_b < 0) & (y_train[s] == 1):
             real_FN += 1
         else:
             real_TN += 1
@@ -250,11 +250,11 @@ def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start
 
     buffered_TP, buffered_FP, buffered_TN, buffered_FN = 0, 0, 0, 0
     for s in range(N):
-        if (np.dot(optimal_w, X_train[s]) + optimal_b >= -1e-5) & (y_train[s] == 1):
+        if (np.dot(solution_w, X_train[s]) + solution_b >= -1e-5) & (y_train[s] == 1):
             buffered_TP += 1
-        elif (np.dot(optimal_w, X_train[s]) + optimal_b >= -1e-5) & (y_train[s] == -1):
+        elif (np.dot(solution_w, X_train[s]) + solution_b >= -1e-5) & (y_train[s] == -1):
             buffered_FP += 1
-        elif (np.dot(optimal_w, X_train[s]) + optimal_b < -1e-5) & (y_train[s] == 1):
+        elif (np.dot(solution_w, X_train[s]) + solution_b < -1e-5) & (y_train[s] == 1):
             buffered_FN += 1
         else:
             buffered_TN += 1
@@ -264,8 +264,8 @@ def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start
         'precision': buffered_TP / (buffered_TP + buffered_FP) if (buffered_TP + buffered_FP) > 0 else 0.0,
         'accuracy': (buffered_TP + buffered_TN) / N}
 
-    precision_in_constraint = (sum(optimal_z_plus[1][j] for j in J_0_plus[1]) + sum(1 for _ in J_ge_plus[1])) / (
-            sum((1 - optimal_z_minus[1][j]) for j in J_0_minus[1]) + sum(1 for _ in J_le_minus[1]))
+    precision_in_constraint = (sum(solution_z_plus[1][j] for j in J_0_plus[1]) + sum(1 for _ in J_ge_plus[1])) / (
+            sum((1 - solution_z_minus[1][j]) for j in J_0_minus[1]) + sum(1 for _ in J_le_minus[1]))
 
     counts_results = {
         'real_TP': real_TP, 'real_FP': real_FP, 'real_TN': real_TN, 'real_FN': real_FN,
@@ -275,7 +275,7 @@ def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start
 
     # in fact, regularization is not included in fixed-epsilon problem, but we still calculate this term for final result comparison
     objective_function_term = {
-        'accuracy_in_obj': sum((optimal_z_plus[0][j] / N) for j in J_0_plus[0]) + sum((1 / N) for _ in J_ge_plus[0]),
+        'accuracy_in_obj': sum((solution_z_plus[0][j] / N) for j in J_0_plus[0]) + sum((1 / N) for _ in J_ge_plus[0]),
         'gamma_in_obj': gamma.X,
         'regularization': lbd * (gp.quicksum(abs_diff_w[p].X for p in range(dim)) + abs_diff_b.X)}
-    return optimal_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_term, real_train_result, buffered_train_result, counts_results
+    return objective_value, optimality_gap, solution_w, solution_b, solution_z_plus, solution_z_minus, objective_function_term, real_train_result, buffered_train_result, counts_results
