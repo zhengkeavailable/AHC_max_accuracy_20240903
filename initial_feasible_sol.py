@@ -1,4 +1,3 @@
-import initial_sol
 import numpy as np
 
 
@@ -24,7 +23,6 @@ def calculate_gamma(obj_cons_num, X_train, y_train, weights, bias, beta_p, epsil
     z_minus_start = {}
     sum_tp = sum(heaviside_closed(0, min(y_train[s], np.dot(weights, X_train[s]) + bias)) for s in range(N))
     sum_dm = sum(heaviside_open(-epsilon, np.dot(weights, X_train[s]) + bias) for s in range(N))
-    # gamma = max(0, - (sum_tp - beta_p * sum_dm))
     gamma = max(0, - (sum_tp - beta_p * sum_dm))
     for i in range(obj_cons_num):
         z_plus_start[i] = {}

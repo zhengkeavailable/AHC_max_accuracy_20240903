@@ -2,7 +2,7 @@ import PIP_fixed
 import csv
 import time
 import initial_feasible_sol
-import initial_sol
+import train_and_evaluate
 
 
 def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, z_plus_start, z_minus_start, epsilon,
@@ -71,7 +71,7 @@ def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, 
         buffered_train_recall.append(buffered_results['recall'])
         buffered_train_precision.append(buffered_results['precision'])
         buffered_train_accuracy.append(buffered_results['accuracy'])
-        real_test_results, buffered_test_results = initial_sol.evaluate_classification(X_test, y_test, w_start, b_start)
+        real_test_results, buffered_test_results = train_and_evaluate.evaluate_classification(X_test, y_test, w_start, b_start)
         real_test_recall.append(real_test_results['recall'])
         real_test_precision.append(real_test_results['precision'])
         real_test_precision_violation = max(0, (beta_p - real_test_results['precision']) / beta_p)
