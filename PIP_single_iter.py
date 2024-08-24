@@ -25,12 +25,20 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
             iterations) + '.txt',
               'a') as f:
         print("delta_1,delta_2,epsilon:", delta_1, delta_2, epsilon, file=f)
+
     w = model.addVars(dim, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="w")
     b = model.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="b")
+    abs_diff_w = model.addVars(dim, lb=0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="abs_diff_w")
+    abs_diff_b = model.addVar(lb=0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="abs_diff_b")
     gamma = model.addVar(lb=0, ub=gamma_0, vtype=GRB.CONTINUOUS, name="gamma")
+
     for p in range(dim):
         w[p].setAttr(gp.GRB.Attr.Start, w_start[p])
+        model.addConstr(w[p]-w_bar[p] <= abs_diff_w[p])
+        model.addConstr(w_bar[p]-w[p] <= abs_diff_w[p])
     b.setAttr(gp.GRB.Attr.Start, b_start)
+    model.addConstr(b-b_bar <= abs_diff_b)
+    model.addConstr(b_bar-b <= abs_diff_b)
 
     for i in range(obj_cons_num):
         z_plus[i] = {}
@@ -91,8 +99,7 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
     if not fixed:
         obj = gp.quicksum((z_plus[0][j] / N) for j in J_0_plus[0]) + sum(
             (1 / N) for _ in J_ge_plus[0]) - rho * gamma - lbd * (
-                      gp.quicksum((w[p] - w_bar[p]) * (w[p] - w_bar[p]) for p in range(dim)) + (b - b_bar) * (
-                      b - b_bar))
+                      gp.quicksum(abs_diff_w[p] for p in range(dim)) + abs_diff_b)
     else:
         obj = gp.quicksum((z_plus[0][j] / N) for j in J_0_plus[0]) + sum(
             (1 / N) for _ in J_ge_plus[0]) - rho * gamma
@@ -136,6 +143,7 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
             optimal_z_minus[i][j] = 1
         for j in J_le_minus[i]:
             optimal_z_minus[i][j] = 0
+
     with (open(dirname + '/Solution' + iter_name + str(outer_or_fixed_iteration) + '_inner_iter=' + str(
             iterations) + '.txt',
                'a') as f):
@@ -174,6 +182,7 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
                         print('\phi^-_' + str(i) + '_' + str(j) + '=', (np.dot(optimal_w, X[j]) + optimal_b),
                               'violates the assumption!',
                               file=f)
+
     real_TP, real_FP, real_TN, real_FN = 0, 0, 0, 0
     for s in range(N):
         if (np.dot(optimal_w, X[s]) + optimal_b >= 0) & (y[s] == 1):
@@ -187,6 +196,7 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
     real_results = {'recall': real_TP / (real_TP + real_FN) if (real_TP + real_FN) > 0 else 0.0,
                     'precision': real_TP / (real_TP + real_FP) if (real_TP + real_FP) > 0 else 0.0,
                     'accuracy': (real_TP + real_TN) / N}
+
     buffered_TP, buffered_FP, buffered_TN, buffered_FN = 0, 0, 0, 0
     for s in range(N):
         if (np.dot(optimal_w, X[s]) + optimal_b >= -1e-5) & (y[s] == 1):
@@ -198,9 +208,9 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
         else:
             buffered_TN += 1
     buffered_results = {'recall': buffered_TP / (buffered_TP + buffered_FN) if (buffered_TP + buffered_FN) > 0 else 0.0,
-                        'precision': buffered_TP / (buffered_TP + buffered_FP) if (
-                                                                                              buffered_TP + buffered_FP) > 0 else 0.0,
+                        'precision': buffered_TP / (buffered_TP + buffered_FP) if (buffered_TP + buffered_FP) > 0 else 0.0,
                         'accuracy': (buffered_TP + buffered_TN) / N}
+
     precision_in_constraint = (sum(optimal_z_plus[1][j] for j in J_0_plus[1]) + sum(1 for _ in J_ge_plus[1])) / (
             sum((1 - optimal_z_minus[1][j]) for j in J_0_minus[1]) + sum(1 for _ in J_le_minus[1]))
     counts_results = {
@@ -208,10 +218,10 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
         'buffered_TP': buffered_TP, 'buffered_FP': buffered_FP, 'buffered_TN': buffered_TN, 'buffered_FN': buffered_FN,
         'precision_in_constraint': precision_in_constraint, 'violations': violations
     }
+
     # in fact, regularization is not included in fixed-epsilon problem, but we still calculate this term for final result comparison
     objective_function_terms = {
         'accuracy_in_obj': sum((optimal_z_plus[0][j] / N) for j in J_0_plus[0]) + sum((1 / N) for _ in J_ge_plus[0]),
         'gamma_in_obj': gamma.X,
-        'regularization': lbd * (sum((optimal_w[p] - w_bar[p]) * (optimal_w[p] - w_bar[p]) for p in range(dim)) + (
-                optimal_b - b_bar) * (optimal_b - b_bar))}
+        'regularization': lbd * (gp.quicksum(abs_diff_w[p].X for p in range(dim)) + abs_diff_b.X)}
     return optimal_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_terms, real_results, buffered_results, counts_results
