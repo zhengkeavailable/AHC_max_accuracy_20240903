@@ -3,7 +3,7 @@ from gurobipy import GRB
 import numpy as np
 
 
-def pip_fixed_problem(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z_plus_start, z_minus_start, epsilon,
+def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z_plus_start, z_minus_start, epsilon,
                       delta_1,
                       delta_2, gamma_0,
                       M, rho, beta_p, lbd, lbd_2, iterations, outer_or_fixed_iteration, dirname, full_mip, fixed):

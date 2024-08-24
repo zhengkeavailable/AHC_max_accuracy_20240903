@@ -51,7 +51,7 @@ def AHC_optimization():
                                                                                          fixed_beta_p=min(para[3], 1),
                                                                                          file_path=para[4],
                                                                                          full_mip=para[5])
-
+        # if not full_mip:
         outer_objective_value, outer_weight, outer_bias, outer_z_plus, outer_z_minus, outer_precision_in_constraint = epsilon_shrinkage.epsilon_shrinkage(
             model, obj_cons_num,
             X_train, y_train,
@@ -85,6 +85,7 @@ def AHC_optimization():
             pip_max_rate,
             fixed_dirname,
             full_mip)
+        # if full mip: full_MIP.full_mip()
         with open(outer_result_file, mode='a', newline='') as file:
             writer = csv.writer(file)
             real_test_results, buffered_test_results = train_and_evaluate.evaluate_classification(X_test, y_test,

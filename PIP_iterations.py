@@ -1,4 +1,4 @@
-import PIP_fixed
+import PIP_single_iter
 import csv
 import time
 import initial_feasible_sol
@@ -31,31 +31,11 @@ def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, 
     iter_unchanged = 0
     for iteration in range(max_iteration):
         objective_value_old = objective_value
-        objective_value, optimality_gap, w_start, b_start, z_plus_start, z_minus_start, objective_function_terms, real_results, buffered_results, counts_results = PIP_fixed.pip_fixed_problem(
-            model=model,
-            obj_cons_num=obj_cons_num,
-            X=X,
-            y=y,
-            w_bar=w_bar,
-            b_bar=b_bar,
-            w_start=w_start,
-            b_start=b_start,
-            z_plus_start=z_plus_start,
-            z_minus_start=z_minus_start,
-            epsilon=epsilon,
-            delta_1=delta_1,
-            delta_2=delta_2,
-            gamma_0=gamma,
-            M=M,
-            rho=rho,
-            beta_p=beta_p,
-            lbd=lbd,
-            lbd_2=lbd_2,
-            iterations=iteration,
-            outer_or_fixed_iteration=outer_or_fixed_iteration,
-            dirname=dirname,
-            full_mip=full_mip,
-            fixed=fixed)
+        objective_value, optimality_gap, w_start, b_start, z_plus_start, z_minus_start, objective_function_terms, real_results, buffered_results, counts_results = PIP_single_iter.pip_single_iter(
+            model=model, obj_cons_num=obj_cons_num, X=X, y=y, w_bar=w_bar, b_bar=b_bar, w_start=w_start,
+            b_start=b_start, z_plus_start=z_plus_start, z_minus_start=z_minus_start, epsilon=epsilon, delta_1=delta_1,
+            delta_2=delta_2, gamma_0=gamma, M=M, rho=rho, beta_p=beta_p, lbd=lbd, lbd_2=lbd_2, iterations=iteration,
+            outer_or_fixed_iteration=outer_or_fixed_iteration, dirname=dirname, full_mip=full_mip, fixed=fixed)
         end_time = time.time()
         execution_time.append(end_time - start_time)
         gamma = objective_function_terms['gamma_in_obj']
