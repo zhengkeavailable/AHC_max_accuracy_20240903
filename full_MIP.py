@@ -5,9 +5,10 @@ import csv
 
 
 def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_start, z_minus_start, epsilon, gamma_0,
-             M, rho, beta_p, dirname):
+             M, rho, beta_p, lbd, dirname):
     """
-    :param model: 
+    :param lbd:
+    :param model:
     :param obj_cons_num: 
     :param X_train: 
     :param y_train: 
@@ -37,11 +38,17 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
 
     w = model.addVars(dim, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="w")
     b = model.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="b")
+    abs_diff_w = model.addVars(dim, lb=0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="abs_diff_w")
+    abs_diff_b = model.addVar(lb=0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="abs_diff_b")
     gamma = model.addVar(lb=0, ub=gamma_0, vtype=GRB.CONTINUOUS, name="gamma")
 
     for p in range(dim):
         w[p].setAttr(gp.GRB.Attr.Start, w_start[p])
+        model.addConstr(w[p] - w_start[p] <= abs_diff_w[p])
+        model.addConstr(w_start[p] - w[p] <= abs_diff_w[p])
     b.setAttr(gp.GRB.Attr.Start, b_start)
+    model.addConstr(b - b_start <= abs_diff_b)
+    model.addConstr(b_start - b <= abs_diff_b)
 
     for i in range(obj_cons_num):
         z_plus[i] = {}
@@ -171,7 +178,7 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
     objective_function_term = {
         'accuracy_in_obj': sum((optimal_z_plus[0][j] / N) for j in range(N)),
         'gamma_in_obj': gamma.X,
-        'regularization': 0}
+        'regularization': lbd * (gp.quicksum(abs_diff_w[p].X for p in range(dim)) + abs_diff_b.X)}
 
     return optimal_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_term, real_train_result, buffered_train_result, counts_results
 
@@ -192,7 +199,7 @@ def output_full_mip(objective_value, optimality_gap, epsilon,
         writer.writerow(
             ['iteration', 'objective_value', 'optimality_gap', 'epsilon', 'cumulative_time', 'time',
              'w', 'b',
-             'accuracy_in_obj', 'gamma_in_obj', 'regularization_in_obj',
+             'accuracy_in_obj', 'gamma_in_obj', 'regularization_NOT_in_obj',
              'real_TP', 'real_FP', 'real_TN', 'real_FN',
              'buffered_TP', 'buffered_FP', 'buffered_TN', 'buffered_FN',
              'precision_in_constraint', 'violations',

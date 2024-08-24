@@ -48,6 +48,7 @@ def pip_iterations(model, obj_cons_num, X_train, y_train, X_test, y_test, w_star
 
     w_bar = w_start
     b_bar = b_start
+
     w_list = []
     b_list = []
 

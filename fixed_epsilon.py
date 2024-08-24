@@ -53,8 +53,10 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
     epsilon_list = []
     objective_value = -M
 
-    z_plus_start = None
-    z_minus_start = None
+    w_current = None
+    b_current = None
+    z_plus_current = None
+    z_minus_current = None
 
     counts_results_list = []
     real_test_precision_violation_list = []
@@ -141,7 +143,7 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
         writer.writerow(
             ['fixed_times', 'objective_value', 'optimality_gap', 'epsilon_q', 'cumulative_time', 'iterative_time',
              'w', 'b',
-             'accuracy_in_obj', 'gamma_in_obj', 'regularization_not_in_obj',
+             'accuracy_in_obj', 'gamma_in_obj', 'regularization_NOT_in_obj',
              'real_TP', 'real_FP', 'real_TN', 'real_FN',
              'buffered_TP', 'buffered_FP', 'buffered_TN', 'buffered_FN',
              'precision_in_constraint', 'violations',
@@ -186,5 +188,5 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
              buffered_train_results_list[max_fixed_times - 1]['precision'],
              buffered_train_results_list[max_fixed_times - 1]['recall']])
 
-    return objective_value, w_start, b_start, z_plus_start, z_minus_start, counts_results_list[max_fixed_times - 1][
+    return objective_value, w_current, b_current, z_plus_current, z_minus_current, counts_results_list[max_fixed_times - 1][
         'precision_in_constraint']
