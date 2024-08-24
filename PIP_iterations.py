@@ -5,11 +5,41 @@ import initial_feasible_sol
 import train_and_evaluate
 
 
-def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, z_plus_start, z_minus_start, epsilon,
+def pip_iterations(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, z_plus_start, z_minus_start, epsilon,
                    delta_1, delta_2, gamma_0, M, rho, beta_p, lbd, max_iteration, base_rate, enlargement_rate,
                    shrinkage_rate, pip_max_rate, objective_value, outer_or_fixed_iteration, dirname, fixed):
+    """
+    :param model:
+    :param obj_cons_num:
+    :param X_train:
+    :param y_train:
+    :param X_test:
+    :param y_test:
+    :param w_start:
+    :param b_start:
+    :param z_plus_start:
+    :param z_minus_start:
+    :param epsilon:
+    :param delta_1:
+    :param delta_2:
+    :param gamma_0:
+    :param M:
+    :param rho:
+    :param beta_p:
+    :param lbd:
+    :param max_iteration:
+    :param base_rate:
+    :param enlargement_rate:
+    :param shrinkage_rate:
+    :param pip_max_rate:
+    :param objective_value:
+    :param outer_or_fixed_iteration:
+    :param dirname:
+    :param fixed:
+    :return:
+    """
     gamma = gamma_0
-    N = X.shape[0]
+    N = X_train.shape[0]
     item_plus = [N, N]
     item_minus = [0, N]
 
@@ -39,9 +69,9 @@ def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, 
     for iteration in range(max_iteration):
         objective_value_old = objective_value
         objective_value, optimality_gap, w_start, b_start, z_plus_start, z_minus_start, objective_function_terms, real_results, buffered_results, counts_results = PIP_single_iter.pip_single_iter(
-            model=model, obj_cons_num=obj_cons_num, X=X, y=y, w_bar=w_bar, b_bar=b_bar, w_start=w_start,
-            b_start=b_start, z_plus_start=z_plus_start, z_minus_start=z_minus_start, epsilon=epsilon, delta_1=delta_1,
-            delta_2=delta_2, gamma_0=gamma, M=M, rho=rho, beta_p=beta_p, lbd=lbd, iterations=iteration,
+            model=model, obj_cons_num=obj_cons_num, X_train=X_train, y_train=y_train, w_bar=w_bar, b_bar=b_bar,
+            w_start=w_start, b_start=b_start, z_plus_start=z_plus_start, z_minus_start=z_minus_start, epsilon=epsilon,
+            delta_1=delta_1, delta_2=delta_2, gamma_0=gamma, M=M, rho=rho, beta_p=beta_p, lbd=lbd, iterations=iteration,
             outer_or_fixed_iteration=outer_or_fixed_iteration, dirname=dirname, fixed=fixed)
         end_time = time.time()
 
@@ -80,7 +110,7 @@ def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, 
             shrinkage_list.append(1)
             base_rate = shrinkage_rate * base_rate
         delta_1, delta_2 = initial_feasible_sol.calculate_delta(obj_cons_num=obj_cons_num, item_plus=item_plus,
-                                                                item_minus=item_minus, X=X, y=y, weight=w_start,
+                                                                item_minus=item_minus, X=X_train, y=y_train, weight=w_start,
                                                                 bias=b_start, epsilon=epsilon, base_rate=base_rate)
         delta_1_list.append(delta_1)
         delta_2_list.append(delta_2)
@@ -90,7 +120,7 @@ def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, 
     if not fixed:
         iter_name = '/outer_iter='
     else:
-        iter_name = '/fixed_iter='
+        iter_name = '/fixed_times='
 
     with open(dirname + iter_name + str(outer_or_fixed_iteration) + '_results_beta_p='+str(beta_p)+'.csv', mode='w', newline='') as file:
         writer = csv.writer(file)

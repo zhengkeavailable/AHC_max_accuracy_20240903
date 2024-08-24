@@ -8,15 +8,15 @@ import csv
 import time
 
 
-def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, epsilon, M, rho, beta_p, lbd,
+def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, beta_p, lbd,
                       max_inner_iteration, max_outer_iteration, gap, sigma, base_rate,
                       enlargement_rate, shrinkage_rate, pip_max_rate, outer_dirname):
     """
     Solve Algorithm IV: An Iterative Algorithm for Solving Fractional Heaviside Composite Optimization
     :param model: gp.Model("BinaryClassifier") in initialization
     :param obj_cons_num: 1 + # of constraints, 'I' in the paper
-    :param X: X_train in training set
-    :param y: y_train in training set
+    :param X_train: X_train in training set
+    :param y_train: y_train in training set
     :param X_test: X_test in test set
     :param y_test: y_test in test set
     :param w_start: (warm start) for setting: w[p].setAttr(gp.GRB.Attr.Start, w_start[p])
@@ -38,7 +38,7 @@ def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_star
     :return: solution of the last outer iteration
     """
     fixed = False
-    N = X.shape[0]
+    N = X_train.shape[0]
     item_plus = [N, N]
     item_minus = [0, N]
     objective_value_list = []
@@ -84,45 +84,21 @@ def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_star
         os.makedirs(dirname + '/Solution')
 
         gamma_0, z_plus_start, z_minus_start = initial_feasible_sol.calculate_gamma(obj_cons_num,
-                                                                                    X,
-                                                                                    y,
+                                                                                    X_train,
+                                                                                    y_train,
                                                                                     w_start,
                                                                                     b_start,
                                                                                     beta_p,
                                                                                     epsilon)
 
         delta_1, delta_2 = initial_feasible_sol.calculate_delta(obj_cons_num=obj_cons_num, item_plus=item_plus,
-                                                                item_minus=item_minus, X=X, y=y, weight=w_start,
+                                                                item_minus=item_minus, X=X_train, y=y_train, weight=w_start,
                                                                 bias=b_start, epsilon=epsilon, base_rate=base_rate)
 
         objective_value, optimality_gap, w_start, b_start, z_plus_start, z_minus_start, objective_function_terms, real_train_result, buffered_train_result, counts_result = PIP_iterations.pip_iterations(
-            model,
-            obj_cons_num,
-            X,
-            y,
-            X_test,
-            y_test,
-            w_start,
-            b_start,
-            z_plus_start,
-            z_minus_start,
-            epsilon,
-            delta_1,
-            delta_2,
-            gamma_0,
-            M,
-            rho,
-            beta_p,
-            lbd,
-            max_inner_iteration,
-            base_rate,
-            enlargement_rate,
-            shrinkage_rate,
-            pip_max_rate,
-            objective_value,
-            outer_iteration,
-            dirname,
-            fixed)
+            model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, z_plus_start, z_minus_start, epsilon, delta_1,
+            delta_2, gamma_0, M, rho, beta_p, lbd, max_inner_iteration, base_rate, enlargement_rate, shrinkage_rate,
+            pip_max_rate, objective_value, outer_iteration, dirname, fixed)
         end_time = time.time()
 
         execution_time.append(end_time - start_time)
@@ -205,5 +181,6 @@ def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_star
              buffered_train_results_list[max_outer_iteration - 1]['accuracy'],
              buffered_train_results_list[max_outer_iteration - 1]['precision'],
              buffered_train_results_list[max_outer_iteration - 1]['recall']])
+
     return objective_value, w_start, b_start, z_plus_start, z_minus_start, counts_results_list[max_outer_iteration - 1][
         'precision_in_constraint']

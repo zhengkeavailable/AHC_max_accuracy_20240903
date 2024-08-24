@@ -8,15 +8,15 @@ import csv
 import time
 
 
-def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, epsilon, M, rho, beta_p, lbd,
+def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, beta_p, lbd,
                   max_inner_iteration, max_fixed_times, base_rate,
                   enlargement_rate, shrinkage_rate, pip_max_rate, fixed_dirname):
     """
     Solve Fractional Heaviside Composite Optimization Problem with some fixed epsilons (no warm start)
     :param model:
     :param obj_cons_num:
-    :param X:
-    :param y:
+    :param X_train:
+    :param y_train:
     :param X_test:
     :param y_test:
     :param w_start:
@@ -36,7 +36,7 @@ def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, e
     :return:
     """
     fixed = True
-    N = X.shape[0]
+    N = X_train.shape[0]
     item_plus = [N, N]
     item_minus = [0, N]
     objective_value_list = []
@@ -68,7 +68,7 @@ def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, e
         
         current_datetime = datetime.now()
         
-        dirname = fixed_dirname + '/' + current_datetime.strftime("%Y-%m-%d_%H-%M-%S") + '_fixed_iter=' + str(
+        dirname = fixed_dirname + '/' + current_datetime.strftime("%Y-%m-%d_%H-%M-%S") + '_fixed_times=' + str(
             fixed_iteration)
         
         os.makedirs(dirname)
@@ -77,45 +77,21 @@ def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, e
         os.makedirs(dirname + '/Solution')
         
         gamma_0, z_plus_start, z_minus_start = initial_feasible_sol.calculate_gamma(obj_cons_num,
-                                                                                    X,
-                                                                                    y,
+                                                                                    X_train,
+                                                                                    y_train,
                                                                                     w_start,
                                                                                     b_start,
                                                                                     beta_p,
                                                                                     epsilon_q)
         
         delta_1, delta_2 = initial_feasible_sol.calculate_delta(obj_cons_num=obj_cons_num, item_plus=item_plus,
-                                                                item_minus=item_minus, X=X, y=y, weight=w_start,
+                                                                item_minus=item_minus, X=X_train, y=y_train, weight=w_start,
                                                                 bias=b_start, epsilon=epsilon_q, base_rate=base_rate)
         
         objective_value, optimality_gap, w_current, b_current, z_plus_current, z_minus_current, objective_function_terms, real_train_result, buffered_train_result, counts_result = PIP_iterations.pip_iterations(
-            model,
-            obj_cons_num,
-            X,
-            y,
-            X_test,
-            y_test,
-            w_start,
-            b_start,
-            z_plus_start,
-            z_minus_start,
-            epsilon_q,
-            delta_1,
-            delta_2,
-            gamma_0,
-            M,
-            rho,
-            beta_p,
-            lbd,
-            max_inner_iteration,
-            base_rate,
-            enlargement_rate,
-            shrinkage_rate,
-            pip_max_rate,
-            objective_value,
-            fixed_iteration,
-            dirname,
-            fixed)
+            model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, z_plus_start, z_minus_start, epsilon_q,
+            delta_1, delta_2, gamma_0, M, rho, beta_p, lbd, max_inner_iteration, base_rate, enlargement_rate,
+            shrinkage_rate, pip_max_rate, objective_value, fixed_iteration, dirname, fixed)
         end_time = time.time()
         
         execution_time.append(end_time - start_time)
@@ -124,14 +100,14 @@ def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, e
         w_list.append(w_current)
         b_list.append(b_current)
         
-        y_binary = ((y + 1) / 2)
+        y_binary = ((y_train + 1) / 2)
         y_test_binary = ((y_test + 1) / 2)
-        precision_and_accuracy_curve.precision_accuracy_curve(X, y_binary, w_current, b_current, num_thresholds=100,
-                                             save_path=dirname + '/fixed_iter=' + str(
+        precision_and_accuracy_curve.precision_accuracy_curve(X_train, y_binary, w_current, b_current, num_thresholds=100,
+                                                              save_path=dirname + '/fixed_times=' + str(
                                                  fixed_iteration) + '_precision_accuracy_curve_train_beta_p=' + str(
                                                  beta_p) + '.png')
         precision_and_accuracy_curve.precision_accuracy_curve(X_test, y_test_binary, w_current, b_current, num_thresholds=100,
-                                             save_path=dirname + '/fixed_iter=' + str(
+                                             save_path=dirname + '/fixed_times=' + str(
                                                  fixed_iteration) + '_precision_accuracy_curve_test_beta_p=' + str(
                                                  beta_p) + '.png')
         

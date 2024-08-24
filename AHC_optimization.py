@@ -38,21 +38,9 @@ def AHC_optimization():
             file_path=para[5])
         # outer
         outer_objective_value, outer_weight, outer_bias, outer_z_plus, outer_z_minus, outer_precision_in_constraint = epsilon_shrinkage.epsilon_shrinkage(
-            model, obj_cons_num,
-            X_train, y_train,
-            X_test, y_test,
-            w_start,
-            b_start, epsilon, M,
-            rho, outer_beta_p,
-            lbd,
-            max_inner_iteration,
-            max_outer_iteration,
-            gap, sigma,
-            base_rate,
-            enlargement_rate,
-            shrinkage_rate,
-            pip_max_rate,
-            outer_dirname)
+            model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, outer_beta_p, lbd,
+            max_inner_iteration, max_outer_iteration, gap, sigma, base_rate, enlargement_rate, shrinkage_rate,
+            pip_max_rate, outer_dirname)
         with open(outer_result_file, mode='a', newline='') as file:
             writer = csv.writer(file)
             real_test_results, buffered_test_results = train_and_evaluate.evaluate_classification(X_test, y_test,
@@ -69,19 +57,8 @@ def AHC_optimization():
                  buffered_test_results['recall'], real_test_precision_violation, buffered_test_precision_violation])
         # fixed
         fixed_objective_value, fixed_weight, fixed_bias, fixed_z_plus, fixed_z_minus, fixed_precision_in_constraint = fixed_epsilon.fixed_epsilon(
-            model, obj_cons_num,
-            X_train, y_train,
-            X_test, y_test,
-            w_start,
-            b_start, epsilon, M,
-            rho, fixed_beta_p,
-            lbd,
-            max_inner_iteration,
-            max_fixed_times,
-            base_rate,
-            enlargement_rate,
-            shrinkage_rate,
-            pip_max_rate,
+            model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, fixed_beta_p, lbd,
+            max_inner_iteration, max_fixed_times, base_rate, enlargement_rate, shrinkage_rate, pip_max_rate,
             fixed_dirname)
         with open(fixed_result_file, mode='a', newline='') as file:
             writer = csv.writer(file)
@@ -106,10 +83,9 @@ def AHC_optimization():
                                                                                     beta_p=full_mip_beta_p,
                                                                                     epsilon=epsilon)
         optimal_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_terms, real_results, buffered_results, counts_results = full_MIP.full_mip(
-            model=model, obj_cons_num=obj_cons_num, X=X_train, y=y_train, w_start=w_start,
-            b_start=b_start, z_plus_start=z_plus_start, z_minus_start=z_minus_start, epsilon=epsilon,
-            gamma_0=gamma_0,
-            M=M, rho=rho, beta_p=full_mip_beta_p, dirname=fixed_dirname)
+            model=model, obj_cons_num=obj_cons_num, X_train=X_train, y_train=y_train, w_start=w_start, b_start=b_start,
+            z_plus_start=z_plus_start, z_minus_start=z_minus_start, epsilon=epsilon, gamma_0=gamma_0, M=M, rho=rho,
+            beta_p=full_mip_beta_p, dirname=fixed_dirname)
 
 
 AHC_optimization()
