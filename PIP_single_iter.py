@@ -4,9 +4,9 @@ import numpy as np
 
 
 def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z_plus_start, z_minus_start, epsilon,
-                      delta_1,
-                      delta_2, gamma_0,
-                      M, rho, beta_p, lbd, lbd_2, iterations, outer_or_fixed_iteration, dirname, full_mip, fixed):
+                    delta_1,
+                    delta_2, gamma_0,
+                    M, rho, beta_p, lbd, iterations, outer_or_fixed_iteration, dirname, fixed):
     if not fixed:
         iter_name = '/outer_iter='
     else:
@@ -26,15 +26,10 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
               'a') as f:
         print("delta_1,delta_2,epsilon:", delta_1, delta_2, epsilon, file=f)
     w = model.addVars(dim, lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="w")
-    w_abs = model.addVars(dim, lb=0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="w_abs")
-    u = model.addVars(dim, lb=0, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="u")
     b = model.addVar(lb=-GRB.INFINITY, ub=GRB.INFINITY, vtype=GRB.CONTINUOUS, name="b")
     gamma = model.addVar(lb=0, ub=gamma_0, vtype=GRB.CONTINUOUS, name="gamma")
     for p in range(dim):
         w[p].setAttr(gp.GRB.Attr.Start, w_start[p])
-        model.addConstr(w[p] <= w_abs[p])
-        model.addConstr(-w[p] <= w_abs[p])
-        model.addConstr(w_abs[p] <= u[p])
     b.setAttr(gp.GRB.Attr.Start, b_start)
 
     for i in range(obj_cons_num):
@@ -91,28 +86,30 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
     model.addConstr(gp.quicksum(z_plus[1][j] for j in J_0_plus[1]) + sum(1 for _ in J_ge_plus[1]) + gp.quicksum(
         beta_p * z_minus[1][j] for j in J_0_minus[1]) + gamma >= beta_p * sum(1 for _ in J_0_minus[1]) + beta_p * sum(
         1 for _ in J_le_minus[1]))
-    model.addConstr((gp.quicksum(u[p] for p in range(dim)))-6 >= 0)
+
     # Set Objective function
-    obj = gp.quicksum((z_plus[0][j] / N) for j in J_0_plus[0]) + sum(
-        (1 / N) for _ in J_ge_plus[0]) - rho * gamma - lbd * (
-                  gp.quicksum((w[p] - w_bar[p]) * (w[p] - w_bar[p]) for p in range(dim)) + (b - b_bar) * (
-                  b - b_bar)) - lbd_2 * ((gp.quicksum(u[p] for p in range(dim)))-6)
+    if not fixed:
+        obj = gp.quicksum((z_plus[0][j] / N) for j in J_0_plus[0]) + sum(
+            (1 / N) for _ in J_ge_plus[0]) - rho * gamma - lbd * (
+                      gp.quicksum((w[p] - w_bar[p]) * (w[p] - w_bar[p]) for p in range(dim)) + (b - b_bar) * (
+                      b - b_bar))
+    else:
+        obj = gp.quicksum((z_plus[0][j] / N) for j in J_0_plus[0]) + sum(
+            (1 / N) for _ in J_ge_plus[0]) - rho * gamma
+
     model.setObjective(obj, GRB.MAXIMIZE)
     model.update()
     num_integer_vars = sum(1 for v in model.getVars() if v.vType == gp.GRB.BINARY)
-    if full_mip:
-        model.setParam("Timelimit", 3600)
+    if num_integer_vars <= 400:
+        model.setParam("Timelimit", 300)
+    elif num_integer_vars <= 800:
+        model.setParam("Timelimit", 600)
+    elif num_integer_vars <= 1200:
+        model.setParam("Timelimit", 900)
+    elif num_integer_vars <= 1600:
+        model.setParam("Timelimit", 1800)
     else:
-        if num_integer_vars <= 400:
-            model.setParam("Timelimit", 300)
-        elif num_integer_vars <= 800:
-            model.setParam("Timelimit", 600)
-        elif num_integer_vars <= 1200:
-            model.setParam("Timelimit", 900)
-        elif num_integer_vars <= 1600:
-            model.setParam("Timelimit", 1800)
-        else:
-            model.setParam("Timelimit", 3600)
+        model.setParam("Timelimit", 3600)
     model.setParam('LogFile',
                    dirname + '/LogFile' + iter_name + str(outer_or_fixed_iteration) + '_inner_iter=' + str(
                        iterations) + '.txt')
@@ -122,7 +119,6 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
     optimal_value = model.objVal
     optimality_gap = model.MIPGap
     optimal_w = [w[p].X for p in range(dim)]
-    optimal_u = [u[p].X for p in range(dim)]
     optimal_b = b.X
     for i in range(obj_cons_num):
         optimal_z_plus[i] = {}
@@ -202,7 +198,8 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
         else:
             buffered_TN += 1
     buffered_results = {'recall': buffered_TP / (buffered_TP + buffered_FN) if (buffered_TP + buffered_FN) > 0 else 0.0,
-                        'precision': buffered_TP / (buffered_TP + buffered_FP) if (buffered_TP + buffered_FP) > 0 else 0.0,
+                        'precision': buffered_TP / (buffered_TP + buffered_FP) if (
+                                                                                              buffered_TP + buffered_FP) > 0 else 0.0,
                         'accuracy': (buffered_TP + buffered_TN) / N}
     precision_in_constraint = (sum(optimal_z_plus[1][j] for j in J_0_plus[1]) + sum(1 for _ in J_ge_plus[1])) / (
             sum((1 - optimal_z_minus[1][j]) for j in J_0_minus[1]) + sum(1 for _ in J_le_minus[1]))
@@ -211,10 +208,10 @@ def pip_single_iter(model, obj_cons_num, X, y, w_bar, b_bar, w_start, b_start, z
         'buffered_TP': buffered_TP, 'buffered_FP': buffered_FP, 'buffered_TN': buffered_TN, 'buffered_FN': buffered_FN,
         'precision_in_constraint': precision_in_constraint, 'violations': violations
     }
+    # in fact, regularization is not included in fixed-epsilon problem, but we still calculate this term for final result comparison
     objective_function_terms = {
         'accuracy_in_obj': sum((optimal_z_plus[0][j] / N) for j in J_0_plus[0]) + sum((1 / N) for _ in J_ge_plus[0]),
         'gamma_in_obj': gamma.X,
         'regularization': lbd * (sum((optimal_w[p] - w_bar[p]) * (optimal_w[p] - w_bar[p]) for p in range(dim)) + (
-                optimal_b - b_bar) * (optimal_b - b_bar)),
-        'regularization_2': lbd_2 * ((sum(optimal_u[p] for p in range(dim)))-6)}
+                optimal_b - b_bar) * (optimal_b - b_bar))}
     return optimal_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_terms, real_results, buffered_results, counts_results

@@ -8,9 +8,9 @@ import csv
 import time
 
 
-def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, epsilon, M, rho, beta_p, lbd, lbd_2,
+def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, epsilon, M, rho, beta_p, lbd,
                       max_inner_iteration, max_outer_iteration, gap, sigma, base_rate,
-                      enlargement_rate, shrinkage_rate, pip_max_rate, outer_dirname, full_mip):
+                      enlargement_rate, shrinkage_rate, pip_max_rate, outer_dirname):
     """
     Solve Algorithm IV: An Iterative Algorithm for Solving Fractional Heaviside Composite Optimization
     :param model: gp.Model("BinaryClassifier") in initialization
@@ -35,7 +35,6 @@ def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_star
     :param shrinkage_rate: shrinkage rate of the ratio of integers in PIP
     :param pip_max_rate: max ratio of integers in PIP of stopping rule
     :param outer_dirname: output directory name
-    :param full_mip: Bool, Full MIP or PIP
     :return: solution of the last outer iteration
     """
     fixed = False
@@ -105,7 +104,6 @@ def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_star
             rho,
             beta_p,
             lbd,
-            lbd_2,
             max_inner_iteration,
             base_rate,
             enlargement_rate,
@@ -114,7 +112,6 @@ def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_star
             objective_value,
             outer_iteration,
             dirname,
-            full_mip,
             fixed)
         end_time = time.time()
         execution_time.append(end_time - start_time)
@@ -153,7 +150,7 @@ def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_star
         writer.writerow(
             ['outer_iteration', 'objective_value', 'optimality_gap', 'epsilon_nu', 'cumulative_time', 'iterative_time',
              'w', 'b',
-             'accuracy_in_obj', 'gamma_in_obj', 'regularization', 'regularization_2',
+             'accuracy_in_obj', 'gamma_in_obj', 'regularization_in_obj',
              'real_TP', 'real_FP', 'real_TN', 'real_FN',
              'buffered_TP', 'buffered_FP', 'buffered_TN', 'buffered_FN',
              'precision_in_constraint', 'violations',
@@ -170,7 +167,6 @@ def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_star
                  objective_function_terms_list[iteration]['accuracy_in_obj'],
                  objective_function_terms_list[iteration]['gamma_in_obj'],
                  objective_function_terms_list[iteration]['regularization'],
-                 objective_function_terms_list[iteration]['regularization_2'],
                  counts_results_list[iteration]['real_TP'], counts_results_list[iteration]['real_FP'],
                  counts_results_list[iteration]['real_TN'], counts_results_list[iteration]['real_FN'],
                  counts_results_list[iteration]['buffered_TP'], counts_results_list[iteration]['buffered_FP'],
@@ -191,13 +187,5 @@ def epsilon_shrinkage(model, obj_cons_num, X, y, X_test, y_test, w_start, b_star
              real_train_recall[max_outer_iteration - 1], buffered_train_accuracy[max_outer_iteration - 1],
              buffered_train_precision[max_outer_iteration - 1],
              buffered_train_recall[max_outer_iteration - 1]])
-    y_binary = ((y + 1) / 2)
-    y_test_binary = ((y_test + 1) / 2)
-    precision_and_accuracy_curve.precision_accuracy_curve(X, y_binary, w_start, b_start, num_thresholds=100,
-                                         save_path=outer_dirname + '/outer_precision_accuracy_curve_final_train_beta_p=' + str(
-                                             beta_p) + '.png')
-    precision_and_accuracy_curve.precision_accuracy_curve(X_test, y_test_binary, w_start, b_start, num_thresholds=100,
-                                         save_path=outer_dirname + '/outer_precision_accuracy_curve_final_test_beta_p=' + str(
-                                             beta_p) + '.png')
     return objective_value, w_start, b_start, z_plus_start, z_minus_start, counts_results_list[max_outer_iteration - 1][
         'precision_in_constraint']

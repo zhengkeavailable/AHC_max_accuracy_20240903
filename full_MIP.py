@@ -130,6 +130,5 @@ def full_mip(model, obj_cons_num, X, y, w_start, b_start, z_plus_start, z_minus_
     objective_function_terms = {
         'accuracy_in_obj': sum((optimal_z_plus[0][j] / N) for j in range(N)),
         'gamma_in_obj': gamma.X,
-        'regularization': 0,
-        'regularization_2': 0}
+        'regularization': 0}
     return optimal_value, optimality_gap, optimal_w, optimal_b, optimal_z_plus, optimal_z_minus, objective_function_terms, real_results, buffered_results, counts_results

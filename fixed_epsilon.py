@@ -8,9 +8,9 @@ import csv
 import time
 
 
-def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, epsilon, M, rho, beta_p, lbd, lbd_2,
+def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, epsilon, M, rho, beta_p, lbd,
                   max_inner_iteration, max_fixed_iteration, base_rate,
-                  enlargement_rate, shrinkage_rate, pip_max_rate, fixed_dirname, full_mip):
+                  enlargement_rate, shrinkage_rate, pip_max_rate, fixed_dirname):
     """
     Solve Fractional Heaviside Composite Optimization Problem with some fixed epsilons (no warm start)
     :param model:
@@ -33,7 +33,6 @@ def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, e
     :param shrinkage_rate:
     :param pip_max_rate:
     :param fixed_dirname:
-    :param full_mip:
     :return:
     """
     fixed = True
@@ -98,7 +97,6 @@ def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, e
             rho,
             beta_p,
             lbd,
-            lbd_2,
             max_inner_iteration,
             base_rate,
             enlargement_rate,
@@ -107,7 +105,6 @@ def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, e
             objective_value,
             fixed_iteration,
             dirname,
-            full_mip,
             fixed)
         end_time = time.time()
         execution_time.append(end_time - start_time)
@@ -152,7 +149,7 @@ def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, e
         writer.writerow(
             ['fixed_iteration', 'objective_value', 'optimality_gap', 'epsilon_q', 'cumulative_time', 'iterative_time',
              'w', 'b',
-             'accuracy_in_obj', 'gamma_in_obj', 'regularization', 'regularization_2',
+             'accuracy_in_obj', 'gamma_in_obj', 'regularization_not_in_obj',
              'real_TP', 'real_FP', 'real_TN', 'real_FN',
              'buffered_TP', 'buffered_FP', 'buffered_TN', 'buffered_FN',
              'precision_in_constraint', 'violations',
@@ -169,7 +166,6 @@ def fixed_epsilon(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, e
                  objective_function_terms_list[iteration]['accuracy_in_obj'],
                  objective_function_terms_list[iteration]['gamma_in_obj'],
                  objective_function_terms_list[iteration]['regularization'],
-                 objective_function_terms_list[iteration]['regularization_2'],
                  counts_results_list[iteration]['real_TP'], counts_results_list[iteration]['real_FP'],
                  counts_results_list[iteration]['real_TN'], counts_results_list[iteration]['real_FN'],
                  counts_results_list[iteration]['buffered_TP'], counts_results_list[iteration]['buffered_FP'],

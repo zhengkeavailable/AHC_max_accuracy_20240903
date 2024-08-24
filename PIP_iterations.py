@@ -6,8 +6,8 @@ import train_and_evaluate
 
 
 def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, z_plus_start, z_minus_start, epsilon,
-                   delta_1, delta_2, gamma_0, M, rho, beta_p, lbd, lbd_2, max_iteration, base_rate, enlargement_rate,
-                   shrinkage_rate, pip_max_rate, objective_value, outer_or_fixed_iteration, dirname, full_mip, fixed):
+                   delta_1, delta_2, gamma_0, M, rho, beta_p, lbd, max_iteration, base_rate, enlargement_rate,
+                   shrinkage_rate, pip_max_rate, objective_value, outer_or_fixed_iteration, dirname, fixed):
     gamma = gamma_0
     N = X.shape[0]
     item_plus = [N, N]
@@ -34,8 +34,8 @@ def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, 
         objective_value, optimality_gap, w_start, b_start, z_plus_start, z_minus_start, objective_function_terms, real_results, buffered_results, counts_results = PIP_single_iter.pip_single_iter(
             model=model, obj_cons_num=obj_cons_num, X=X, y=y, w_bar=w_bar, b_bar=b_bar, w_start=w_start,
             b_start=b_start, z_plus_start=z_plus_start, z_minus_start=z_minus_start, epsilon=epsilon, delta_1=delta_1,
-            delta_2=delta_2, gamma_0=gamma, M=M, rho=rho, beta_p=beta_p, lbd=lbd, lbd_2=lbd_2, iterations=iteration,
-            outer_or_fixed_iteration=outer_or_fixed_iteration, dirname=dirname, full_mip=full_mip, fixed=fixed)
+            delta_2=delta_2, gamma_0=gamma, M=M, rho=rho, beta_p=beta_p, lbd=lbd, iterations=iteration,
+            outer_or_fixed_iteration=outer_or_fixed_iteration, dirname=dirname, fixed=fixed)
         end_time = time.time()
         execution_time.append(end_time - start_time)
         gamma = objective_function_terms['gamma_in_obj']
@@ -77,7 +77,7 @@ def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, 
                                                                 bias=b_start, epsilon=epsilon, base_rate=base_rate)
         delta_1_list.append(delta_1)
         delta_2_list.append(delta_2)
-        if (iter_unchanged >= 3) or full_mip:
+        if iter_unchanged >= 3:
             max_iteration = iteration + 1
             break
     if not fixed:
@@ -89,7 +89,7 @@ def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, 
         writer.writerow(
             ['Iterations', 'objective_value', 'optimality_gap', 'shrinkage', 'delta_1', 'delta_2_', 'time',
              'w', 'b',
-             'accuracy_in_obj', 'gamma_in_obj', 'regularization','regularization_2',
+             'accuracy_in_obj', 'gamma_in_obj', 'regularization',
              'real_TP', 'real_FP', 'real_TN', 'real_FN',
              'buffered_TP', 'buffered_FP', 'buffered_TN', 'buffered_FN',
              'precision_in_constraint', 'violations',
@@ -107,7 +107,6 @@ def pip_iterations(model, obj_cons_num, X, y, X_test, y_test, w_start, b_start, 
                  objective_function_terms_list[iteration]['accuracy_in_obj'],
                  objective_function_terms_list[iteration]['gamma_in_obj'],
                  objective_function_terms_list[iteration]['regularization'],
-                 objective_function_terms_list[iteration]['regularization_2'],
                  counts_results_list[iteration]['real_TP'], counts_results_list[iteration]['real_FP'],
                  counts_results_list[iteration]['real_TN'], counts_results_list[iteration]['real_FN'],
                  counts_results_list[iteration]['buffered_TP'], counts_results_list[iteration]['buffered_FP'],
