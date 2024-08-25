@@ -1,6 +1,5 @@
 import train_and_evaluate
 import initial_feasible_sol
-import precision_and_accuracy_curve
 import PIP_iterations
 import os
 from datetime import datetime
@@ -103,19 +102,6 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
         optimality_gap_list.append(optimality_gap)
         w_list.append(w_current)
         b_list.append(b_current)
-
-        y_binary = ((y_train + 1) / 2)
-        y_test_binary = ((y_test + 1) / 2)
-        precision_and_accuracy_curve.precision_accuracy_curve(X_train, y_binary, w_current, b_current,
-                                                              num_thresholds=100,
-                                                              save_path=dirname + '/fixed_times=' + str(
-                                                                  fixed_times) + '_precision_accuracy_curve_train_beta_p=' + str(
-                                                                  beta_p) + '.png')
-        precision_and_accuracy_curve.precision_accuracy_curve(X_test, y_test_binary, w_current, b_current,
-                                                              num_thresholds=100,
-                                                              save_path=dirname + '/fixed_times=' + str(
-                                                                  fixed_times) + '_precision_accuracy_curve_test_beta_p=' + str(
-                                                                  beta_p) + '.png')
 
         objective_function_terms_list.append(objective_function_terms)
         counts_results_list.append(counts_result)

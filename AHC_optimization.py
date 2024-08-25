@@ -82,7 +82,7 @@ def AHC_optimization():
                  buffered_test_result['recall'], real_test_precision_violation, buffered_test_precision_violation])
 
         # full_mip
-        full_mip_epsilon = epsilon * (10**(-4))
+        full_mip_epsilon = epsilon * (10 ** (-4))
         gamma_0, z_plus_start, z_minus_start = initial_feasible_sol.calculate_gamma(obj_cons_num=obj_cons_num,
                                                                                     X_train=X_train,
                                                                                     y_train=y_train,
@@ -91,11 +91,11 @@ def AHC_optimization():
                                                                                     beta_p=full_mip_beta_p,
                                                                                     epsilon=full_mip_epsilon)
 
-
         full_mip_start_time = time.time()
         full_mip_objective_value, full_mip_optimality_gap, full_mip_weights, full_mip_bias, full_mip_z_plus, full_mip_z_minus, full_mip_objective_function_term, full_mip_real_train_result, full_mip_buffered_train_result, full_mip_counts_result = full_MIP.full_mip(
             model=model, obj_cons_num=obj_cons_num, X_train=X_train, y_train=y_train, w_start=w_start, b_start=b_start,
-            z_plus_start=z_plus_start, z_minus_start=z_minus_start, epsilon=full_mip_epsilon, gamma_0=gamma_0, M=M, rho=rho,
+            z_plus_start=z_plus_start, z_minus_start=z_minus_start, epsilon=full_mip_epsilon, gamma_0=gamma_0, M=M,
+            rho=rho,
             beta_p=full_mip_beta_p, lbd=lbd, dirname=fixed_dirname)
         full_mip_end_time = time.time()
         execution_time = full_mip_end_time - full_mip_start_time
