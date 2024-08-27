@@ -11,18 +11,18 @@ import time
 def AHC_optimization():
     rice_file_path = 'rice'
     paras = [
-        [500 / 3810, 500 / 3810, 0.95, 0.95, 0.95, rice_file_path],
-        [1000 / 3810, 1000 / 3810, 0.95, 0.95, 0.95, rice_file_path],
-        [1500 / 3810, 1500 / 3810, 0.95, 0.95, 0.95, rice_file_path],
-        [500 / 3810, 500 / 3810, 0.96, 0.96, 0.96, rice_file_path],
-        [1000 / 3810, 1000 / 3810, 0.96, 0.96, 0.96, rice_file_path],
-        [1500 / 3810, 1500 / 3810, 0.96, 0.96, 0.96, rice_file_path],
-        [500 / 3810, 500 / 3810, 0.97, 0.97, 0.97, rice_file_path],
-        [1000 / 3810, 1000 / 3810, 0.97, 0.97, 0.97, rice_file_path],
-        [1500 / 3810, 1500 / 3810, 0.97, 0.97, 0.97, rice_file_path],
-        [500 / 3810, 500 / 3810, 0.98, 0.98, 0.98, rice_file_path],
-        [1000 / 3810, 1000 / 3810, 0.98, 0.98, 0.98, rice_file_path],
-        [1500 / 3810, 1500 / 3810, 0.98, 0.98, 0.98, rice_file_path]
+        [500 / 3810, 500 / 3810, 0.95, 0.95, 0.95, rice_file_path, 1],
+        [1000 / 3810, 1000 / 3810, 0.95, 0.95, 0.95, rice_file_path, 1],
+        [1500 / 3810, 1500 / 3810, 0.95, 0.95, 0.95, rice_file_path, 1],
+        [500 / 3810, 500 / 3810, 0.96, 0.96, 0.96, rice_file_path, 1],
+        [1000 / 3810, 1000 / 3810, 0.96, 0.96, 0.96, rice_file_path, 1],
+        [1500 / 3810, 1500 / 3810, 0.96, 0.96, 0.96, rice_file_path, 1],
+        [500 / 3810, 500 / 3810, 0.97, 0.97, 0.97, rice_file_path, 1],
+        [1000 / 3810, 1000 / 3810, 0.97, 0.97, 0.97, rice_file_path, 1],
+        [1500 / 3810, 1500 / 3810, 0.97, 0.97, 0.97, rice_file_path, 1],
+        [500 / 3810, 500 / 3810, 0.98, 0.98, 0.98, rice_file_path, 1],
+        [1000 / 3810, 1000 / 3810, 0.98, 0.98, 0.98, rice_file_path, 1],
+        [1500 / 3810, 1500 / 3810, 0.98, 0.98, 0.98, rice_file_path, 1]
     ]
 
     for para in paras:
@@ -37,9 +37,10 @@ def AHC_optimization():
             outer_beta_p=min(para[2], 1),
             fixed_beta_p=min(para[3], 1),
             full_mip_beta_p=min(para[4], 1),
-            file_path=para[5])
+            file_path=para[5],
+            lbd=para[6])
 
-        # outer
+        # epsilon-shrinkage
         outer_objective_value, outer_weights, outer_bias, outer_z_plus, outer_z_minus, outer_precision_in_constraint = epsilon_shrinkage.epsilon_shrinkage(
             model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, outer_beta_p, lbd,
             max_inner_iteration, max_outer_iteration, gap, sigma, base_rate, enlargement_rate, shrinkage_rate,
@@ -60,7 +61,7 @@ def AHC_optimization():
                  buffered_test_result['accuracy'], buffered_test_result['precision'],
                  buffered_test_result['recall'], real_test_precision_violation, buffered_test_precision_violation])
 
-        # fixed
+        # fixed epsilon
         fixed_objective_value, fixed_weights, fixed_bias, fixed_z_plus, fixed_z_minus, fixed_precision_in_constraint = fixed_epsilon.fixed_epsilon(
             model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, fixed_beta_p, lbd,
             max_inner_iteration, max_fixed_times, base_rate, enlargement_rate, shrinkage_rate, pip_max_rate,
@@ -96,7 +97,7 @@ def AHC_optimization():
             model=model, obj_cons_num=obj_cons_num, X_train=X_train, y_train=y_train, w_start=w_start, b_start=b_start,
             z_plus_start=z_plus_start, z_minus_start=z_minus_start, epsilon=full_mip_epsilon, gamma_0=gamma_0, M=M,
             rho=rho,
-            beta_p=full_mip_beta_p, lbd=lbd, dirname=fixed_dirname)
+            beta_p=full_mip_beta_p, lbd=lbd, dirname=full_mip_dirname)
         full_mip_end_time = time.time()
         execution_time = full_mip_end_time - full_mip_start_time
 

@@ -6,7 +6,7 @@ import csv
 
 
 def initialization(positive_size=1.0, negative_size=0.125, fixed_beta_p=0.1, outer_beta_p=0.1, full_mip_beta_p=0.1,
-                   file_path=None):
+                   file_path=None, lbd=1):
     """
     Initialization of all parameters in function 'epsilon_shrinkage'
     :param outer_beta_p: lowerbound of precision
@@ -15,6 +15,7 @@ def initialization(positive_size=1.0, negative_size=0.125, fixed_beta_p=0.1, out
     :param positive_size: # of positive samples / # of positives in dataset
     :param negative_size: # of negative samples / # of negatives in dataset
     :param file_path: file path
+    :param lbd: coefficient of step controlling regularizer
     :return: parameters in function 'epsilon_shrinkage'
     """
     # model
@@ -52,7 +53,7 @@ def initialization(positive_size=1.0, negative_size=0.125, fixed_beta_p=0.1, out
     # M, rho, lbd
     M = 1e2
     rho = 1e4
-    lbd = 0.1
+    lbd = lbd
 
     # max_inner_iteration
     max_inner_iteration = 10

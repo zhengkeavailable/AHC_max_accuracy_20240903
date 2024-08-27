@@ -2,6 +2,7 @@ import gurobipy as gp
 from gurobipy import GRB
 import numpy as np
 import csv
+import os
 
 
 def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_start, z_minus_start, epsilon, gamma_0,
@@ -85,11 +86,14 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
     num_integer_vars = sum(1 for v in model.getVars() if v.vType == gp.GRB.BINARY)
 
     model.setParam("Timelimit", 3600)
-    model.setParam('LogFile',
-                   dirname + '/LogFile/' + 'log_file_full_mip.txt')
+    os.makedirs(os.path.join(dirname, 'LogFile'), exist_ok=True)
+    model.setParam('LogFile', os.path.join(dirname, 'LogFile', 'log_file_full_mip.txt'))
+    # model.setParam('LogFile',
+    #                dirname + '/LogFile/log_file_full_mip.txt')
     model.optimize()
+    os.makedirs(os.path.join(dirname, 'Model'), exist_ok=True)
     model.write(
-        dirname + '/Model/' + 'model_full_mip.lp')
+        dirname + '/Model/model_full_mip.lp')
 
     objective_value = model.objVal
     optimality_gap = model.MIPGap
@@ -101,10 +105,11 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
         optimal_z_minus[i] = {}
         for j in range(N):
             optimal_z_plus[i][j] = z_plus[i][j].X
+        if i == 1:
+            for j in range(N):
+                optimal_z_minus[i][j] = z_minus[i][j].X
 
-        for j in range(N):
-            optimal_z_minus[i][j] = z_minus[i][j].X
-
+    os.makedirs(os.path.join(dirname, 'Solution'), exist_ok=True)
     with (open(dirname + '/Solution/' + 'solution_full_mip.txt',
                'a') as f):
         violations = 0
