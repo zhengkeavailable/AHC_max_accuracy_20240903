@@ -60,7 +60,6 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
             z_minus[i][j] = model.addVar(vtype=GRB.BINARY, name="z_minus_" + str(i) + "_" + str(j))
 
     for i in range(obj_cons_num):
-
         for j in range(item_plus[i]):
             if i == 0:
                 z_plus[i][j].setAttr(gp.GRB.Attr.Start, z_plus_start[i][j])
@@ -126,6 +125,12 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
                     print('\phi^+_' + str(i) + '_' + str(j) + '=',
                           min(y_train[j], np.dot(optimal_w, X_train[j]) + optimal_b),
                           file=f)
+                    if (min(y_train[j], np.dot(optimal_w, X_train[j]) + optimal_b) >= 0) and (
+                            optimal_z_plus[i][j] == 0):
+                        print('z_plus_wrong!', file=f)
+                    if (min(y_train[j], np.dot(optimal_w, X_train[j]) + optimal_b) < 0) and (
+                            optimal_z_plus[i][j] == 1):
+                        print('z_plus_wrong!', file=f)
 
             for j in range(item_minus[i]):
                 print("y_" + str(j) + '=', y_train[j], file=f)
@@ -134,6 +139,10 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
                     print('-\phi^-_' + str(i) + '_' + str(j) + '-epsilon =',
                           -(np.dot(optimal_w, X_train[j]) + optimal_b) - epsilon,
                           file=f)
+                    if (-(np.dot(optimal_w, X_train[j]) + optimal_b) - epsilon >= 0) and (optimal_z_minus[i][j] == 0):
+                        print('z_minus_wrong!', file=f)
+                    if (-(np.dot(optimal_w, X_train[j]) + optimal_b) - epsilon < 0) and (optimal_z_minus[i][j] == 1):
+                        print('z_minus_wrong!', file=f)
                     if (np.dot(optimal_w, X_train[j]) + optimal_b < 0) & (
                             np.dot(optimal_w, X_train[j]) + optimal_b > -epsilon):
                         violations += 1
@@ -199,7 +208,8 @@ def output_full_mip(objective_value, optimality_gap, full_mip_epsilon,
                     real_test_precision_violation,
                     buffered_test_result,
                     buffered_test_precision_violation, full_mip_dirname, full_mip_beta_p):
-    with open(full_mip_dirname + '/full_mip_results_beta_p=' + str(full_mip_beta_p) + '.csv', mode='w', newline='') as file:
+    with open(full_mip_dirname + '/full_mip_results_beta_p=' + str(full_mip_beta_p) + '.csv', mode='w',
+              newline='') as file:
         writer = csv.writer(file)
         writer.writerow(
             ['iteration', 'objective_value', 'optimality_gap', 'epsilon', 'cumulative_time', 'time',
