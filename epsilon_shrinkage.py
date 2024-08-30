@@ -63,7 +63,7 @@ def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_s
     buffered_test_precision_violation_list = []
 
     start_time = time.time()
-    execution_time = []
+    cumulative_time = []
     outer_iter_unchanged = 0
 
     for outer_iteration in range(max_outer_iteration):
@@ -101,7 +101,7 @@ def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_s
             pip_max_rate, objective_value, outer_iteration, dirname, fixed)
         end_time = time.time()
 
-        execution_time.append(end_time - start_time)
+        cumulative_time.append(end_time - start_time)
         objective_value_list.append(objective_value)
         optimality_gap_list.append(optimality_gap)
         w_list.append(w_start)
@@ -129,8 +129,8 @@ def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_s
             max_outer_iteration = outer_iteration + 1
             break
 
-    iterative_time = [execution_time[0]]
-    iterative_time += [execution_time[i] - execution_time[i - 1] for i in range(1, len(execution_time))]
+    iterative_time = [cumulative_time[0]]
+    iterative_time += [cumulative_time[i] - cumulative_time[i - 1] for i in range(1, len(cumulative_time))]
 
     with open(outer_dirname + '/outer_results_beta_p='+str(beta_p)+'.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
@@ -150,7 +150,7 @@ def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_s
         for iteration in range(max_outer_iteration):
             writer.writerow(
                 [iteration, objective_value_list[iteration], optimality_gap_list[iteration], epsilon_nu[iteration],
-                 execution_time[iteration], iterative_time[iteration],
+                 cumulative_time[iteration], iterative_time[iteration],
                  w_list[iteration], b_list[iteration],
                  objective_function_terms_list[iteration]['accuracy_in_obj'],
                  objective_function_terms_list[iteration]['gamma_in_obj'],
@@ -181,6 +181,10 @@ def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_s
              buffered_train_results_list[max_outer_iteration - 1]['accuracy'],
              buffered_train_results_list[max_outer_iteration - 1]['precision'],
              buffered_train_results_list[max_outer_iteration - 1]['recall']])
+        
+    with open('AHC_all_result.csv', mode='a', newline='') as all_result:
+        writer = csv.writer(all_result)
+        writer.writerow([objective_value_list[max_outer_iteration - 1], optimality_gap_list[max_outer_iteration - 1], cumulative_time[max_outer_iteration - 1]])
 
     return objective_value, w_start, b_start, z_plus_start, z_minus_start, counts_results_list[max_outer_iteration - 1][
         'precision_in_constraint']

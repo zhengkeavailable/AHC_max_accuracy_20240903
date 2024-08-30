@@ -61,7 +61,7 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
     real_test_precision_violation_list = []
     buffered_test_precision_violation_list = []
     start_time = time.time()
-    execution_time = []
+    cumulative_time = []
 
     for fixed_times in range(max_fixed_times):
         epsilon_q = epsilon * (10 ** (-fixed_times - 1))
@@ -97,7 +97,7 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
             shrinkage_rate, pip_max_rate, objective_value, fixed_times, dirname, fixed)
         end_time = time.time()
 
-        execution_time.append(end_time - start_time)
+        cumulative_time.append(end_time - start_time)
         objective_value_list.append(objective_value)
         optimality_gap_list.append(optimality_gap)
         w_list.append(w_current)
@@ -121,8 +121,8 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
         buffered_test_precision_violation = max(0, (beta_p - buffered_test_result['precision']) / beta_p)
         buffered_test_precision_violation_list.append(buffered_test_precision_violation)
 
-    iterative_time = [execution_time[0]]
-    iterative_time += [execution_time[i] - execution_time[i - 1] for i in range(1, len(execution_time))]
+    iterative_time = [cumulative_time[0]]
+    iterative_time += [cumulative_time[i] - cumulative_time[i - 1] for i in range(1, len(cumulative_time))]
 
     with open(fixed_dirname + '/fixed_results_beta_p=' + str(beta_p) + '.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
@@ -142,7 +142,7 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
         for iteration in range(max_fixed_times):
             writer.writerow(
                 [iteration, objective_value_list[iteration], optimality_gap_list[iteration], epsilon_list[iteration],
-                 execution_time[iteration], iterative_time[iteration],
+                 cumulative_time[iteration], iterative_time[iteration],
                  w_list[iteration], b_list[iteration],
                  objective_function_terms_list[iteration]['accuracy_in_obj'],
                  objective_function_terms_list[iteration]['gamma_in_obj'],
@@ -163,6 +163,12 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
                  real_test_precision_violation_list[iteration],
                  buffered_test_results_list[iteration]['accuracy'], buffered_test_results_list[iteration]['precision'],
                  buffered_test_results_list[iteration]['recall'], buffered_test_precision_violation_list[iteration]])
+
+    with open('AHC_all_result.csv', mode='a', newline='') as all_result:
+        writer = csv.writer(all_result)
+        for iteration in range(max_fixed_times):
+            writer.writerow(
+                [objective_value_list[iteration], optimality_gap_list[iteration], iterative_time[iteration]])
 
     with open(fixed_dirname + '/fixed_results_comparison.csv', mode='a', newline='') as file:
         writer = csv.writer(file)

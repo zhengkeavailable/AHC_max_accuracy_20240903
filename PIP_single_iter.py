@@ -1,6 +1,7 @@
 import gurobipy as gp
 from gurobipy import GRB
 import numpy as np
+import MIP_callback
 
 
 def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start, b_start, z_plus_start, z_minus_start,
@@ -160,7 +161,7 @@ def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start
     model.setParam('LogFile',
                    dirname + '/LogFile' + iter_name + str(outer_or_fixed_iteration) + '_inner_iter=' + str(
                        iterations) + '.txt')
-    model.optimize()
+    model.optimize(MIP_callback.mip_callback)
     model.write(
         dirname + '/Model' + iter_name + str(outer_or_fixed_iteration) + '_inner_iter=' + str(iterations) + ".lp")
 

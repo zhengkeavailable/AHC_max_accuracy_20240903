@@ -20,11 +20,11 @@ def mip_callback(model, where):
             mip_callback.last_obj = current_obj
             mip_callback.start_time = time.time()
             # objective value keeps unchanged for this mip_callback.time_limit: stop
-            mip_callback.time_limit = 1000  
+            mip_callback.time_limit = 60
 
         # check whether objective value is unchanged
         # check every 10s
-        if current_time - mip_callback.last_time > 10:
+        if current_time - mip_callback.last_time > 5:
             # tolerance of difference between objective values during time_limit 
             if abs(current_obj - mip_callback.last_obj) < 1e-5:  
                 if time.time() - mip_callback.start_time > mip_callback.time_limit:
