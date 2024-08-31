@@ -9,30 +9,28 @@ def mip_callback(model, where):
     :return: 
     """
     if where == grb.GRB.Callback.MIP:
-        # obtain current objective value
+        # Obtain current objective value and runtime
         current_obj = model.cbGet(grb.GRB.Callback.MIP_OBJBST)
-        # obtain current time
         current_time = model.cbGet(grb.GRB.Callback.RUNTIME)
 
-        # obtain time record
-        if 'last_time' not in mip_callback.__dict__:
-            mip_callback.last_time = current_time
-            mip_callback.last_obj = current_obj
-            mip_callback.start_time = time.time()
-            # objective value keeps unchanged for this mip_callback.time_limit: stop
-            mip_callback.time_limit = 60
+        # Initialize time record if not already set
+        if 'last_time' not in model.__dict__:
+            model.__dict__['last_time'] = current_time
+            model.__dict__['last_obj'] = current_obj
+            model.__dict__['start_time'] = time.time()
+            model.__dict__['time_limit'] = 60
 
-        # check whether objective value is unchanged
-        # check every 10s
-        if current_time - mip_callback.last_time > 5:
-            # tolerance of difference between objective values during time_limit 
-            if abs(current_obj - mip_callback.last_obj) < 1e-4:
-                if time.time() - mip_callback.start_time > mip_callback.time_limit:
-                    model.terminate() 
+        # Check if objective value is unchanged
+        if current_time - model.__dict__['last_time'] > 5:
+            if abs(current_obj - model.__dict__['last_obj']) < 1e-4:
+                if time.time() - model.__dict__['start_time'] > model.__dict__['time_limit']:
+                    print("Terminating optimization due to stagnant objective value.")
+                    model.terminate()
             else:
-                mip_callback.last_time = current_time
-                mip_callback.last_obj = current_obj
-                mip_callback.start_time = time.time()  # objective value changes, reset time
+                # Reset the time record if objective value changes
+                model.__dict__['last_time'] = current_time
+                model.__dict__['last_obj'] = current_obj
+                model.__dict__['start_time'] = time.time()
 
 
 # model = grb.Model()

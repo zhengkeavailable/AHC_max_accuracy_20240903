@@ -130,9 +130,9 @@ def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start
                         -gp.quicksum(w[p] * X_train[j][p] for p in range(dim)) - b >= -M * (
                                     1 - z_minus[i][j]) + epsilon)
 
-    # model.addConstr(gp.quicksum(z_plus[1][j] for j in J_0_plus[1]) + sum(1 for _ in J_ge_plus[1]) + gp.quicksum(
-    #     beta_p * z_minus[1][j] for j in J_0_minus[1]) + gamma >= beta_p * sum(1 for _ in J_0_minus[1]) + beta_p * sum(
-    #     1 for _ in J_le_minus[1]))
+    model.addConstr(gp.quicksum(z_plus[1][j] for j in J_0_plus[1]) + sum(1 for _ in J_ge_plus[1]) + gp.quicksum(
+        beta_p * z_minus[1][j] for j in J_0_minus[1]) + gamma >= beta_p * sum(1 for _ in J_0_minus[1]) + beta_p * sum(
+        1 for _ in J_le_minus[1]))
 
     # Set Objective function
     if not fixed:
@@ -161,8 +161,8 @@ def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start
     model.setParam('LogFile',
                    dirname + '/LogFile' + iter_name + str(outer_or_fixed_iteration) + '_inner_iter=' + str(
                        iterations) + '.txt')
-    # model.optimize(MIP_callback.mip_callback)
-    model.optimize()
+    model.optimize(MIP_callback.mip_callback)
+    # model.optimize()
     model.write(
         dirname + '/Model' + iter_name + str(outer_or_fixed_iteration) + '_inner_iter=' + str(iterations) + ".lp")
 

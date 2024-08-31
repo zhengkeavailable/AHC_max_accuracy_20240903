@@ -76,8 +76,8 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
                 model.addConstr(
                     -gp.quicksum(w[p] * X_train[j][p] for p in range(dim)) - b >= -M * (1 - z_minus[i][j]) + epsilon)
 
-    # model.addConstr(gp.quicksum(z_plus[1][j] for j in range(N)) - gp.quicksum(
-    #     beta_p * (1 - z_minus[1][j]) for j in range(N)) + gamma >= 0)
+    model.addConstr(gp.quicksum(z_plus[1][j] for j in range(N)) - gp.quicksum(
+        beta_p * (1 - z_minus[1][j]) for j in range(N)) + gamma >= 0)
 
     obj = gp.quicksum((z_plus[0][j] / N) for j in range(N)) - rho * gamma
     model.setObjective(obj, GRB.MAXIMIZE)
