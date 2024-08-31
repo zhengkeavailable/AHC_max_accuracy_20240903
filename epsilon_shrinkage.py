@@ -8,7 +8,8 @@ import csv
 import time
 
 
-def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, beta_p, lbd,
+def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, beta_p,
+                      lbd,
                       max_inner_iteration, max_outer_iteration, gap, sigma, base_rate,
                       enlargement_rate, shrinkage_rate, pip_max_rate, outer_dirname):
     """
@@ -92,11 +93,13 @@ def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_s
                                                                                     epsilon)
 
         delta_1, delta_2 = initial_feasible_sol.calculate_delta(obj_cons_num=obj_cons_num, item_plus=item_plus,
-                                                                item_minus=item_minus, X=X_train, y=y_train, weight=w_start,
+                                                                item_minus=item_minus, X=X_train, y=y_train,
+                                                                weight=w_start,
                                                                 bias=b_start, epsilon=epsilon, base_rate=base_rate)
 
         objective_value, optimality_gap, w_start, b_start, z_plus_start, z_minus_start, objective_function_terms, real_train_result, buffered_train_result, counts_result = PIP_iterations.pip_iterations(
-            model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, z_plus_start, z_minus_start, epsilon, delta_1,
+            model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, z_plus_start, z_minus_start,
+            epsilon, delta_1,
             delta_2, gamma_0, M, rho, beta_p, lbd, max_inner_iteration, base_rate, enlargement_rate, shrinkage_rate,
             pip_max_rate, objective_value, outer_iteration, dirname, fixed)
         end_time = time.time()
@@ -113,7 +116,8 @@ def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_s
         real_train_results_list.append(real_train_result)
         buffered_train_results_list.append(buffered_train_result)
 
-        real_test_result, buffered_test_result = train_and_evaluate.evaluate_classification(X_test, y_test, w_start, b_start)
+        real_test_result, buffered_test_result = train_and_evaluate.evaluate_classification(X_test, y_test, w_start,
+                                                                                            b_start)
 
         real_test_results_list.append(real_test_result)
 
@@ -132,7 +136,7 @@ def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_s
     iterative_time = [cumulative_time[0]]
     iterative_time += [cumulative_time[i] - cumulative_time[i - 1] for i in range(1, len(cumulative_time))]
 
-    with open(outer_dirname + '/outer_results_beta_p='+str(beta_p)+'.csv', mode='w', newline='') as file:
+    with open(outer_dirname + '/outer_results_beta_p=' + str(beta_p) + '.csv', mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(
             ['outer_iteration', 'objective_value', 'optimality_gap', 'epsilon_nu', 'cumulative_time', 'iterative_time',
@@ -181,10 +185,33 @@ def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_s
              buffered_train_results_list[max_outer_iteration - 1]['accuracy'],
              buffered_train_results_list[max_outer_iteration - 1]['precision'],
              buffered_train_results_list[max_outer_iteration - 1]['recall']])
-        
+
     with open('AHC_all_result.csv', mode='a', newline='') as all_result:
         writer = csv.writer(all_result)
-        writer.writerow([objective_value_list[max_outer_iteration - 1], optimality_gap_list[max_outer_iteration - 1], cumulative_time[max_outer_iteration - 1]])
+        writer.writerow([objective_value_list[max_outer_iteration - 1], optimality_gap_list[max_outer_iteration - 1],
+                         cumulative_time[max_outer_iteration - 1], w_list[max_outer_iteration - 1], b_list[max_outer_iteration - 1],
+                         objective_function_terms_list[max_outer_iteration - 1]['accuracy_in_obj'],
+                         objective_function_terms_list[max_outer_iteration - 1]['gamma_in_obj'],
+                         objective_function_terms_list[max_outer_iteration - 1]['regularization'],
+                         counts_results_list[max_outer_iteration - 1]['real_TP'], counts_results_list[max_outer_iteration - 1]['real_FP'],
+                         counts_results_list[max_outer_iteration - 1]['real_TN'], counts_results_list[max_outer_iteration - 1]['real_FN'],
+                         counts_results_list[max_outer_iteration - 1]['buffered_TP'], counts_results_list[max_outer_iteration - 1]['buffered_FP'],
+                         counts_results_list[max_outer_iteration - 1]['buffered_TN'], counts_results_list[max_outer_iteration - 1]['buffered_FN'],
+                         counts_results_list[max_outer_iteration - 1]['precision_in_constraint'],
+                         counts_results_list[max_outer_iteration - 1]['violations'],
+                         real_train_results_list[max_outer_iteration - 1]['accuracy'],
+                         real_train_results_list[max_outer_iteration - 1]['precision'],
+                         real_train_results_list[max_outer_iteration - 1]['recall'],
+                         buffered_train_results_list[max_outer_iteration - 1]['accuracy'],
+                         buffered_train_results_list[max_outer_iteration - 1]['precision'],
+                         buffered_train_results_list[max_outer_iteration - 1]['recall'],
+                         real_test_results_list[max_outer_iteration - 1]['accuracy'], real_test_results_list[max_outer_iteration - 1]['precision'],
+                         real_test_results_list[max_outer_iteration - 1]['recall'],
+                         real_test_precision_violation_list[max_outer_iteration - 1],
+                         buffered_test_results_list[max_outer_iteration - 1]['accuracy'],
+                         buffered_test_results_list[max_outer_iteration - 1]['precision'],
+                         buffered_test_results_list[max_outer_iteration - 1]['recall'],
+                         buffered_test_precision_violation_list[max_outer_iteration - 1]])
 
     return objective_value, w_start, b_start, z_plus_start, z_minus_start, counts_results_list[max_outer_iteration - 1][
         'precision_in_constraint']

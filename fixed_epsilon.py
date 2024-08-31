@@ -168,7 +168,26 @@ def fixed_epsilon(model, obj_cons_num, X_train, y_train, X_test, y_test, w_start
         writer = csv.writer(all_result)
         for iteration in range(max_fixed_times):
             writer.writerow(
-                [objective_value_list[iteration], optimality_gap_list[iteration], iterative_time[iteration]])
+                [objective_value_list[iteration], optimality_gap_list[iteration], iterative_time[iteration], w_list[iteration], b_list[iteration],
+                 objective_function_terms_list[iteration]['accuracy_in_obj'],
+                 objective_function_terms_list[iteration]['gamma_in_obj'],
+                 objective_function_terms_list[iteration]['regularization'],
+                 counts_results_list[iteration]['real_TP'], counts_results_list[iteration]['real_FP'],
+                 counts_results_list[iteration]['real_TN'], counts_results_list[iteration]['real_FN'],
+                 counts_results_list[iteration]['buffered_TP'], counts_results_list[iteration]['buffered_FP'],
+                 counts_results_list[iteration]['buffered_TN'], counts_results_list[iteration]['buffered_FN'],
+                 counts_results_list[iteration]['precision_in_constraint'],
+                 counts_results_list[iteration]['violations'],
+                 real_train_results_list[iteration]['accuracy'], real_train_results_list[iteration]['precision'],
+                 real_train_results_list[iteration]['recall'],
+                 buffered_train_results_list[iteration]['accuracy'],
+                 buffered_train_results_list[iteration]['precision'],
+                 buffered_train_results_list[iteration]['recall'],
+                 real_test_results_list[iteration]['accuracy'], real_test_results_list[iteration]['precision'],
+                 real_test_results_list[iteration]['recall'],
+                 real_test_precision_violation_list[iteration],
+                 buffered_test_results_list[iteration]['accuracy'], buffered_test_results_list[iteration]['precision'],
+                 buffered_test_results_list[iteration]['recall'], buffered_test_precision_violation_list[iteration]])
 
     with open(fixed_dirname + '/fixed_results_comparison.csv', mode='a', newline='') as file:
         writer = csv.writer(file)
