@@ -26,7 +26,7 @@ def mip_callback(model, where):
         # check every 10s
         if current_time - mip_callback.last_time > 5:
             # tolerance of difference between objective values during time_limit 
-            if abs(current_obj - mip_callback.last_obj) < 1e-5:  
+            if abs(current_obj - mip_callback.last_obj) < 1e-4:
                 if time.time() - mip_callback.start_time > mip_callback.time_limit:
                     model.terminate() 
             else:
