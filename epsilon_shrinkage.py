@@ -121,12 +121,12 @@ def epsilon_shrinkage(model, obj_cons_num, X_train, y_train, X_test, y_test, w_s
 
         real_test_results_list.append(real_test_result)
 
-        real_test_precision_violation = max(0, (beta_p - real_test_result['precision']) / beta_p)
+        real_test_precision_violation = max(0, (beta_p - real_test_result['precision']) / beta_p if beta_p > 0 else 0.0)
         real_test_precision_violation_list.append(real_test_precision_violation)
 
         buffered_test_results_list.append(buffered_test_result)
 
-        buffered_test_precision_violation = max(0, (beta_p - buffered_test_result['precision']) / beta_p)
+        buffered_test_precision_violation = max(0, (beta_p - buffered_test_result['precision']) / beta_p if beta_p > 0 else 0.0)
         buffered_test_precision_violation_list.append(buffered_test_precision_violation)
 
         if outer_iter_unchanged >= 10:
