@@ -30,7 +30,7 @@ def AHC_optimization():
                          'buffered_test_precision_violation'])
 
     paras = [
-        # [500 / 3810, 500 / 3810, 0.95, 0.95, 0.95, rice_file_path, 100],
+        [500 / 3810, 500 / 3810, 0.95, 0.95, 0.95, rice_file_path, 100],
         # [1000 / 3810, 1000 / 3810, 0.95, 0.95, 0.95, rice_file_path, 100],
         # [1500 / 3810, 1500 / 3810, 0.95, 0.95, 0.95, rice_file_path, 100],
         # [500 / 3810, 500 / 3810, 0.96, 0.96, 0.96, rice_file_path, 100],
@@ -90,10 +90,10 @@ def AHC_optimization():
         # [1500 / 3810, 1500 / 3810, 0.96, 0.96, 0.96, rice_file_path, 0.001],
         # [500 / 3810, 500 / 3810, 0.97, 0.97, 0.97, rice_file_path, 0.001],
         # [1000 / 3810, 1000 / 3810, 0.97, 0.97, 0.97, rice_file_path, 0.001],
-        [1500 / 3810, 1500 / 3810, 0.97, 0.97, 0.97, rice_file_path, 0.001, 4410],
+        # [1500 / 3810, 1500 / 3810, 0.97, 0.97, 0.97, rice_file_path, 0.001, 4410],
         # [500 / 3810, 500 / 3810, 0.98, 0.98, 0.98, rice_file_path, 0.001],
         # [1000 / 3810, 1000 / 3810, 0.98, 0.98, 0.98, rice_file_path, 0.001],
-        [1500 / 3810, 1500 / 3810, 0.98, 0.98, 0.98, rice_file_path, 0.001, 6078]
+        # [1500 / 3810, 1500 / 3810, 0.98, 0.98, 0.98, rice_file_path, 0.001, 6078]
     ]
 
     for para in paras:
@@ -102,7 +102,8 @@ def AHC_optimization():
          lbd, max_inner_iteration, max_outer_iteration, max_fixed_times,
          gap, sigma, base_rate, enlargement_rate, shrinkage_rate, pip_max_rate,
          outer_dirname, fixed_dirname, full_mip_dirname,
-         outer_result_file, fixed_result_file, full_mip_result_file, full_mip_timelimit) = initialization.initialization(
+         outer_result_file, fixed_result_file, full_mip_result_file,
+         full_mip_timelimit) = initialization.initialization(
             positive_size=para[0],
             negative_size=para[1],
             outer_beta_p=min(para[2], 1),
@@ -110,7 +111,7 @@ def AHC_optimization():
             full_mip_beta_p=min(para[4], 1),
             file_path=para[5],
             lbd=para[6],
-            full_mip_timelimit = para[7] if len(para) > 7 else 3600)
+            full_mip_timelimit=para[7] if len(para) > 7 else 3600)
 
         with open(file_name_csv, mode='a', newline='') as file:
             writer = csv.writer(file)
@@ -149,7 +150,7 @@ def AHC_optimization():
         full_mip_real_test_precision_violation = max(0, (full_mip_beta_p - full_mip_real_test_result[
             'precision']) / full_mip_beta_p if full_mip_beta_p > 0 else 0.0)
         full_mip_buffered_test_precision_violation = max(0, (full_mip_beta_p - full_mip_buffered_test_result[
-                                                             'precision']) / full_mip_beta_p if full_mip_beta_p > 0 else 0.0)
+            'precision']) / full_mip_beta_p if full_mip_beta_p > 0 else 0.0)
 
         full_MIP.output_full_mip(full_mip_objective_value, full_mip_optimality_gap, full_mip_epsilon,
                                  execution_time,

@@ -1,4 +1,4 @@
-from ucimlrepo import fetch_ucirepo
+# from ucimlrepo import fetch_ucirepo
 import pandas as pd
 import numpy as np
 from scipy.io import arff
