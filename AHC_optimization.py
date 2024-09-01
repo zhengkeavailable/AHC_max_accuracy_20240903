@@ -110,7 +110,7 @@ def AHC_optimization():
             full_mip_beta_p=min(para[4], 1),
             file_path=para[5],
             lbd=para[6],
-            full_mip_timelimit=para[7])
+            full_mip_timelimit = para[7] if len(para) > 7 else 3600)
 
         with open(file_name_csv, mode='a', newline='') as file:
             writer = csv.writer(file)
