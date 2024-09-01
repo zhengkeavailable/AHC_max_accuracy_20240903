@@ -6,7 +6,7 @@ import os
 
 
 def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_start, z_minus_start, epsilon, gamma_0,
-             M, rho, beta_p, lbd, dirname):
+             M, rho, beta_p, lbd, dirname, timelimit=3600):
     """
     :param lbd:
     :param model:
@@ -84,7 +84,7 @@ def full_mip(model, obj_cons_num, X_train, y_train, w_start, b_start, z_plus_sta
     model.update()
     num_integer_vars = sum(1 for v in model.getVars() if v.vType == gp.GRB.BINARY)
 
-    model.setParam("Timelimit", 3600)
+    model.setParam("Timelimit", timelimit)
     os.makedirs(os.path.join(dirname, 'LogFile'), exist_ok=True)
     model.setParam('LogFile', os.path.join(dirname, 'LogFile', 'log_file_full_mip.txt'))
     # model.setParam('LogFile',
