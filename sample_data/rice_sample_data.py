@@ -13,7 +13,7 @@ def sample_data(file_path=None, random_seed=None, positive_size=1.0, negative_si
     # # Combine features and targets into a single DataFrame
     # df = pd.concat([features, df_targets], axis=1)
     # df.to_csv('rice_cammeo_osmancik.csv', index=False)
-    df = pd.read_csv('rice_cammeo_osmancik.csv')
+    df = pd.read_csv('rice_cammeo_osmancik.csv',encoding='utf-8')
 
     # Extract indices where Class == 1 (Cammeo) and Class == 0 (Osmancik)
     indices_cammeo = df.index[df['Class'] == 'Cammeo'].tolist()

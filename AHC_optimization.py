@@ -1,9 +1,9 @@
-import initial_feasible_sol
-import train_and_evaluate
-import epsilon_shrinkage
-import fixed_epsilon
-import full_MIP
-import initialization
+from ahc_packages import initial_feasible_sol
+from ahc_packages import train_and_evaluate
+from ahc_packages import epsilon_shrinkage
+from ahc_packages import fixed_epsilon
+from ahc_packages import full_MIP
+from ahc_packages import initialization
 import csv
 import time
 
@@ -103,15 +103,14 @@ def AHC_optimization():
          gap, sigma, base_rate, enlargement_rate, shrinkage_rate, pip_max_rate,
          outer_dirname, fixed_dirname, full_mip_dirname,
          outer_result_file, fixed_result_file, full_mip_result_file,
-         full_mip_timelimit) = initialization.initialization(
-            positive_size=para[0],
-            negative_size=para[1],
-            outer_beta_p=min(para[2], 1),
-            fixed_beta_p=min(para[3], 1),
-            full_mip_beta_p=min(para[4], 1),
-            file_path=para[5],
-            lbd=para[6],
-            full_mip_timelimit=para[7] if len(para) > 7 else 3600)
+         full_mip_timelimit) = initialization.initialization(positive_size=para[0],
+                                                             negative_size=para[1],
+                                                             outer_beta_p=min(para[2], 1),
+                                                             fixed_beta_p=min(para[3], 1),
+                                                             full_mip_beta_p=min(para[4], 1),
+                                                             file_path=para[5],
+                                                             lbd=para[6],
+                                                             full_mip_timelimit=para[7] if len(para) > 7 else 3600)
 
         with open(file_name_csv, mode='a', newline='') as file:
             writer = csv.writer(file)
