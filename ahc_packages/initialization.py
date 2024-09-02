@@ -84,15 +84,15 @@ def initialization(positive_size=1.0, negative_size=0.125, fixed_beta_p=0.1, out
     outer_dirname = current_datetime.strftime("%Y-%m-%d_%H-%M-%S") + '_outer_positive_size=' + str(
         round(positive_size, 2)) + '_negative_size=' + str(round(negative_size, 2)) + '_beta_p=' + str(
         round(outer_beta_p, 2))
-    # os.makedirs(outer_dirname)
+    os.makedirs(outer_dirname)
     outer_result_file = outer_dirname + '/outer_results_comparison.csv'
-    #
+
     # fixed_dirname
     fixed_dirname = current_datetime.strftime("%Y-%m-%d_%H-%M-%S") + '_fixed_positive_size=' + str(
         round(positive_size, 2)) + '_negative_size=' + str(round(negative_size, 2)) + '_beta_p=' + str(
         round(fixed_beta_p, 2))
-    # if lbd == 1:
-    #     os.makedirs(fixed_dirname)
+    if lbd == 1:
+        os.makedirs(fixed_dirname)
     fixed_result_file = fixed_dirname + '/fixed_results_comparison.csv'
 
     # full_mip_dirname
@@ -112,38 +112,38 @@ def initialization(positive_size=1.0, negative_size=0.125, fixed_beta_p=0.1, out
                                                                                                           w_start,
                                                                                                           b_start)
 
-    # # outer
-    # with open(outer_result_file, mode='a', newline='') as file:
-    #     writer = csv.writer(file)
-    #     writer.writerow(
-    #         ['', 'real_accuracy', 'real_precision',
-    #          'real_recall', 'buffered_accuracy', 'buffered_precision', 'buffered_recall', 'real_test_violation',
-    #          'buffered_test_violation'])
-    #     writer.writerow(
-    #         ['initial_train', results['train_accuracy'], results['train_precision'], results['train_recall'],
-    #          initial_buffered_train_results['accuracy'], initial_buffered_train_results['precision'],
-    #          initial_buffered_train_results['recall']])
-    #     writer.writerow(
-    #         ['initial_test', results['test_accuracy'], results['test_precision'], results['test_recall'],
-    #          initial_buffered_test_results['accuracy'], initial_buffered_test_results['precision'],
-    #          initial_buffered_test_results['recall']])
-    #
-    # # fixed
-    # if lbd == 1:
-    #     with open(fixed_result_file, mode='a', newline='') as file:
-    #         writer = csv.writer(file)
-    #         writer.writerow(
-    #             ['', 'real_accuracy', 'real_precision',
-    #              'real_recall', 'buffered_accuracy', 'buffered_precision', 'buffered_recall', 'real_test_violation',
-    #              'buffered_test_violation'])
-    #         writer.writerow(
-    #             ['initial_train', results['train_accuracy'], results['train_precision'], results['train_recall'],
-    #              initial_buffered_train_results['accuracy'], initial_buffered_train_results['precision'],
-    #              initial_buffered_train_results['recall']])
-    #         writer.writerow(
-    #             ['initial_test', results['test_accuracy'], results['test_precision'], results['test_recall'],
-    #              initial_buffered_test_results['accuracy'], initial_buffered_test_results['precision'],
-    #              initial_buffered_test_results['recall']])
+    # outer
+    with open(outer_result_file, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(
+            ['', 'real_accuracy', 'real_precision',
+             'real_recall', 'buffered_accuracy', 'buffered_precision', 'buffered_recall', 'real_test_violation',
+             'buffered_test_violation'])
+        writer.writerow(
+            ['initial_train', results['train_accuracy'], results['train_precision'], results['train_recall'],
+             initial_buffered_train_results['accuracy'], initial_buffered_train_results['precision'],
+             initial_buffered_train_results['recall']])
+        writer.writerow(
+            ['initial_test', results['test_accuracy'], results['test_precision'], results['test_recall'],
+             initial_buffered_test_results['accuracy'], initial_buffered_test_results['precision'],
+             initial_buffered_test_results['recall']])
+
+    # fixed
+    if lbd == 1:
+        with open(fixed_result_file, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(
+                ['', 'real_accuracy', 'real_precision',
+                 'real_recall', 'buffered_accuracy', 'buffered_precision', 'buffered_recall', 'real_test_violation',
+                 'buffered_test_violation'])
+            writer.writerow(
+                ['initial_train', results['train_accuracy'], results['train_precision'], results['train_recall'],
+                 initial_buffered_train_results['accuracy'], initial_buffered_train_results['precision'],
+                 initial_buffered_train_results['recall']])
+            writer.writerow(
+                ['initial_test', results['test_accuracy'], results['test_precision'], results['test_recall'],
+                 initial_buffered_test_results['accuracy'], initial_buffered_test_results['precision'],
+                 initial_buffered_test_results['recall']])
 
     # full_mip
     with open(full_mip_result_file, mode='a', newline='') as file:
