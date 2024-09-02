@@ -1,7 +1,7 @@
 import gurobipy as gp
 from gurobipy import GRB
 import numpy as np
-import MIP_callback
+from ahc_packages import MIP_callback
 
 
 def pip_single_iter(model, obj_cons_num, X_train, y_train, w_bar, b_bar, w_start, b_start, z_plus_start, z_minus_start,

@@ -19,6 +19,7 @@ def initialization(positive_size=1.0, negative_size=0.125, fixed_beta_p=0.1, out
     :param lbd: coefficient of step controlling regularizer
     :return: parameters in function 'epsilon_shrinkage'
     """
+    print("initialization!")
     # model
     model = gp.Model("BinaryClassifier")
     model.setParam('IntegralityFocus', 1)

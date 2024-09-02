@@ -30,7 +30,7 @@ def AHC_optimization():
                          'buffered_test_precision_violation'])
 
     paras = [
-        [500 / 3810, 500 / 3810, 0.95, 0.95, 0.95, rice_file_path, 100],
+        [500 / 3810, 500 / 3810, 0.95, 0.95, 0.95, rice_file_path, 1],
         # [1000 / 3810, 1000 / 3810, 0.95, 0.95, 0.95, rice_file_path, 100],
         # [1500 / 3810, 1500 / 3810, 0.95, 0.95, 0.95, rice_file_path, 100],
         # [500 / 3810, 500 / 3810, 0.96, 0.96, 0.96, rice_file_path, 100],
@@ -115,11 +115,11 @@ def AHC_optimization():
         with open(file_name_csv, mode='a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow([full_mip_dirname, para[6]])
-            # if para[6] == 1:
-            #     writer.writerow([fixed_dirname, para[6]])
-            #     writer.writerow([fixed_dirname, para[6]])
-            #     writer.writerow([fixed_dirname, para[6]])
-            # writer.writerow([outer_dirname, para[6]])
+            if para[6] == 1:
+                writer.writerow([fixed_dirname, para[6]])
+                writer.writerow([fixed_dirname, para[6]])
+                writer.writerow([fixed_dirname, para[6]])
+            writer.writerow([outer_dirname, para[6]])
 
         # full_mip
         full_mip_epsilon = epsilon * (10 ** (-4))
@@ -204,55 +204,55 @@ def AHC_optimization():
                  full_mip_buffered_test_result['recall'], full_mip_real_test_precision_violation,
                  full_mip_buffered_test_precision_violation])
 
-        # # fixed epsilon
-        # if para[6] == 1:
-        #     fixed_objective_value, fixed_weights, fixed_bias, fixed_z_plus, fixed_z_minus, fixed_precision_in_constraint = fixed_epsilon.fixed_epsilon(
-        #         model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, fixed_beta_p,
-        #         lbd, max_inner_iteration, max_fixed_times, base_rate, enlargement_rate, shrinkage_rate, pip_max_rate,
-        #         fixed_dirname)
-        #
-        #     with open(fixed_result_file, mode='a', newline='') as file:
-        #         writer = csv.writer(file)
-        #         fixed_real_test_result, fixed_buffered_test_result = train_and_evaluate.evaluate_classification(X_test,
-        #                                                                                                         y_test,
-        #                                                                                                         fixed_weights,
-        #                                                                                                         fixed_bias)
-        #         fixed_real_test_precision_violation = max(0, (fixed_beta_p - fixed_real_test_result[
-        #                                                          'precision']) / fixed_beta_p if fixed_beta_p > 0 else 0.0)
-        #         fixed_buffered_test_precision_violation = max(0,
-        #                                                       (fixed_beta_p - fixed_buffered_test_result[
-        #                                                           'precision']) / fixed_beta_p if fixed_beta_p > 0 else 0.0)
-        #         writer.writerow(
-        #             ['final_test', fixed_real_test_result['accuracy'], fixed_real_test_result['precision'],
-        #              fixed_real_test_result['recall'],
-        #              fixed_buffered_test_result['accuracy'], fixed_buffered_test_result['precision'],
-        #              fixed_buffered_test_result['recall'], fixed_real_test_precision_violation,
-        #              fixed_buffered_test_precision_violation])
-        #
-        # # epsilon-shrinkage
-        # outer_objective_value, outer_weights, outer_bias, outer_z_plus, outer_z_minus, outer_precision_in_constraint = epsilon_shrinkage.epsilon_shrinkage(
-        #     model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, outer_beta_p,
-        #     lbd,
-        #     max_inner_iteration, max_outer_iteration, gap, sigma, base_rate, enlargement_rate, shrinkage_rate,
-        #     pip_max_rate, outer_dirname)
-        #
-        # with open(outer_result_file, mode='a', newline='') as file:
-        #     writer = csv.writer(file)
-        #     outer_real_test_result, outer_buffered_test_result = train_and_evaluate.evaluate_classification(X_test,
-        #                                                                                                     y_test,
-        #                                                                                                     outer_weights,
-        #                                                                                                     outer_bias)
-        #     outer_real_test_precision_violation = max(0, (outer_beta_p - outer_real_test_result[
-        #                                                      'precision']) / outer_beta_p if outer_beta_p > 0 else 0.0)
-        #     outer_buffered_test_precision_violation = max(0,
-        #                                                   (outer_beta_p - outer_buffered_test_result[
-        #                                                       'precision']) / outer_beta_p if outer_beta_p > 0 else 0.0)
-        #     writer.writerow(
-        #         ['final_test', outer_real_test_result['accuracy'], outer_real_test_result['precision'],
-        #          outer_real_test_result['recall'],
-        #          outer_buffered_test_result['accuracy'], outer_buffered_test_result['precision'],
-        #          outer_buffered_test_result['recall'], outer_real_test_precision_violation,
-        #          outer_buffered_test_precision_violation])
+        # fixed epsilon
+        if para[6] == 1:
+            fixed_objective_value, fixed_weights, fixed_bias, fixed_z_plus, fixed_z_minus, fixed_precision_in_constraint = fixed_epsilon.fixed_epsilon(
+                model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, fixed_beta_p,
+                lbd, max_inner_iteration, max_fixed_times, base_rate, enlargement_rate, shrinkage_rate, pip_max_rate,
+                fixed_dirname)
+
+            with open(fixed_result_file, mode='a', newline='') as file:
+                writer = csv.writer(file)
+                fixed_real_test_result, fixed_buffered_test_result = train_and_evaluate.evaluate_classification(X_test,
+                                                                                                                y_test,
+                                                                                                                fixed_weights,
+                                                                                                                fixed_bias)
+                fixed_real_test_precision_violation = max(0, (fixed_beta_p - fixed_real_test_result[
+                                                                 'precision']) / fixed_beta_p if fixed_beta_p > 0 else 0.0)
+                fixed_buffered_test_precision_violation = max(0,
+                                                              (fixed_beta_p - fixed_buffered_test_result[
+                                                                  'precision']) / fixed_beta_p if fixed_beta_p > 0 else 0.0)
+                writer.writerow(
+                    ['final_test', fixed_real_test_result['accuracy'], fixed_real_test_result['precision'],
+                     fixed_real_test_result['recall'],
+                     fixed_buffered_test_result['accuracy'], fixed_buffered_test_result['precision'],
+                     fixed_buffered_test_result['recall'], fixed_real_test_precision_violation,
+                     fixed_buffered_test_precision_violation])
+
+        # epsilon-shrinkage
+        outer_objective_value, outer_weights, outer_bias, outer_z_plus, outer_z_minus, outer_precision_in_constraint = epsilon_shrinkage.epsilon_shrinkage(
+            model, obj_cons_num, X_train, y_train, X_test, y_test, w_start, b_start, epsilon, M, rho, outer_beta_p,
+            lbd,
+            max_inner_iteration, max_outer_iteration, gap, sigma, base_rate, enlargement_rate, shrinkage_rate,
+            pip_max_rate, outer_dirname)
+
+        with open(outer_result_file, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            outer_real_test_result, outer_buffered_test_result = train_and_evaluate.evaluate_classification(X_test,
+                                                                                                            y_test,
+                                                                                                            outer_weights,
+                                                                                                            outer_bias)
+            outer_real_test_precision_violation = max(0, (outer_beta_p - outer_real_test_result[
+                                                             'precision']) / outer_beta_p if outer_beta_p > 0 else 0.0)
+            outer_buffered_test_precision_violation = max(0,
+                                                          (outer_beta_p - outer_buffered_test_result[
+                                                              'precision']) / outer_beta_p if outer_beta_p > 0 else 0.0)
+            writer.writerow(
+                ['final_test', outer_real_test_result['accuracy'], outer_real_test_result['precision'],
+                 outer_real_test_result['recall'],
+                 outer_buffered_test_result['accuracy'], outer_buffered_test_result['precision'],
+                 outer_buffered_test_result['recall'], outer_real_test_precision_violation,
+                 outer_buffered_test_precision_violation])
 
 
 AHC_optimization()

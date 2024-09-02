@@ -1,7 +1,7 @@
-import train_and_evaluate
-import initial_feasible_sol
-import precision_and_accuracy_curve
-import PIP_iterations
+from ahc_packages import train_and_evaluate
+from ahc_packages import initial_feasible_sol
+from ahc_packages import precision_and_accuracy_curve
+from ahc_packages import PIP_iterations
 import os
 from datetime import datetime
 import csv
